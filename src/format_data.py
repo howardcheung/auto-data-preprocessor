@@ -9,6 +9,7 @@
 """
 
 # import python internal libraries
+from datetime import datetime, timedelta
 
 # import third party libraries
 from pandas import DataFrame
@@ -17,8 +18,8 @@ from pandas import DataFrame
 
 
 # write functions
-def convert_df(datadf: DataFrame, interval: float=600,
-               step: bool=True) -> DataFrame:
+def convert_df(datadf: DataFrame, start_time: datetime,
+               interval: float=600, step: bool=True) -> DataFrame:
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
@@ -30,6 +31,9 @@ def convert_df(datadf: DataFrame, interval: float=600,
             dataframe which index are datetime.datetime objects and contain
             data collected at time of change
 
+        start_time: datetime.datetime
+            user-defined starting time
+
         interval: float
             user-defined time interval for the new data frame in seconds.
             Default 600 (10 minutes)
@@ -39,9 +43,16 @@ def convert_df(datadf: DataFrame, interval: float=600,
             True. Indeed this input won't work until further notice.
     """
 
-    # calculate the starting time index for the new dataframe
-
     # calculate the ending index for the new dataframe
+    num = 1
+    while start_time+timedelta(seconds=interval*num) < datadf.index[-1]:
+        num += 1
+    end_time = start_time+timedelta(seconds=interval*(num-1))
+
+    # create the new dataframe with the correct indexes and column names
+    final_df = DataFrame(index=[
+        start_time+timedelta(seconds=interval*ind) for ind in range(num)
+    ], columns=datadf.columns)
 
     if step:
         # calculate the starting values for the new dataframe
@@ -55,7 +66,7 @@ def convert_df(datadf: DataFrame, interval: float=600,
             u' incomplete. Should not be used for now.'
         ]))
 
-    return DataFrame()
+    return final_df
 
 
 # testing functions
@@ -66,7 +77,9 @@ if __name__ == '__main__':
 
     FILENAME = '../dat/time_of_change.csv'
     TEST_DF = read_data(FILENAME, header=0)
-    NEW_DF = convert_df(TEST_DF)
+    NEW_DF = convert_df(TEST_DF, datetime(2011, 1, 11, 0, 0))
     assert isinstance(NEW_DF, DataFrame)
+    assert NEW_DF.index[-1] <= TEST_DF.index[-1]
+    assert NEW_DF.index[-1] >= TEST_DF.index[-2]
 
     print('All functions in', basename(__file__), 'are ok')
