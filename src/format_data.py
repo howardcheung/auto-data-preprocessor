@@ -10,6 +10,7 @@
 
 # import python internal libraries
 from datetime import datetime, timedelta
+from math import isnan
 
 # import third party libraries
 from pandas import DataFrame
@@ -66,6 +67,19 @@ def convert_df(datadf: DataFrame, start_time: datetime,
 
     if step:
         # calculate the starting values for the new dataframe
+        # if the starting value is not given, assume that the initial value
+        # is the smallest for all possible values
+        for col in final_df.columns:
+            # find the appearance of the first value
+            for oldind in datadf.index:
+                if not isnan(datadf.loc[oldind, col]):
+                    pos = oldind
+                    break
+            if final_df.index[0] >= pos:
+                final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
+            else:
+                final_df.loc[final_df.index[0], col] = \
+                    datadf[col].dropna().unique().min()
 
         # continue to append new columns until the end
 
@@ -95,8 +109,11 @@ if __name__ == '__main__':
 
     # check function for new ending time
     NEW_DF = convert_df(
-        TEST_DF, datetime(2011, 1, 11, 0, 0), datetime(2011, 12, 31, 11, 50)
+        TEST_DF, datetime(2011, 1, 1, 0, 0), datetime(2011, 12, 31, 11, 50)
     )
+    print(NEW_DF)
     assert NEW_DF.index[-1] == datetime(2011, 12, 31, 11, 50)
+    assert NEW_DF.loc[NEW_DF.index[0], 'Item 4'] == 0.0
+    assert NEW_DF.loc[NEW_DF.index[0], 'Item 3'] == 0.0
 
     print('All functions in', basename(__file__), 'are ok')
