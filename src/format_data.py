@@ -19,7 +19,8 @@ from pandas import DataFrame
 
 # write functions
 def convert_df(datadf: DataFrame, start_time: datetime,
-               interval: float=600, step: bool=True) -> DataFrame:
+               end_time: datetime=None, interval: float=600,
+               step: bool=True) -> DataFrame:
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
@@ -34,6 +35,11 @@ def convert_df(datadf: DataFrame, start_time: datetime,
         start_time: datetime.datetime
             user-defined starting time
 
+        end_time: datatime.datetime
+            users preliminary override of the ending time of the new
+            dataframe. If it does not fit the intervals correctly, it may
+            get updated
+
         interval: float
             user-defined time interval for the new data frame in seconds.
             Default 600 (10 minutes)
@@ -45,8 +51,12 @@ def convert_df(datadf: DataFrame, start_time: datetime,
 
     # calculate the ending index for the new dataframe
     num = 1
-    while start_time+timedelta(seconds=interval*num) < datadf.index[-1]:
-        num += 1
+    if end_time is None:
+        while start_time+timedelta(seconds=interval*num) < datadf.index[-1]:
+            num += 1
+    else:
+        while start_time+timedelta(seconds=interval*num) <= end_time:
+            num += 1
     end_time = start_time+timedelta(seconds=interval*(num-1))
 
     # create the new dataframe with the correct indexes and column names
@@ -75,11 +85,18 @@ if __name__ == '__main__':
     from os.path import basename
     from data_read import read_data
 
+    # check function for computer-generated ending time
     FILENAME = '../dat/time_of_change.csv'
     TEST_DF = read_data(FILENAME, header=0)
     NEW_DF = convert_df(TEST_DF, datetime(2011, 1, 11, 0, 0))
     assert isinstance(NEW_DF, DataFrame)
     assert NEW_DF.index[-1] <= TEST_DF.index[-1]
     assert NEW_DF.index[-1] >= TEST_DF.index[-2]
+
+    # check function for new ending time
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2011, 1, 11, 0, 0), datetime(2011, 12, 31, 11, 50)
+    )
+    assert NEW_DF.index[-1] == datetime(2011, 12, 31, 11, 50)
 
     print('All functions in', basename(__file__), 'are ok')
