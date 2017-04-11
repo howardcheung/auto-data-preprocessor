@@ -5,7 +5,7 @@
     preprocess the data and wrap them into a namedtuple.
 
     Author: Howard Cheung (howard.at@gmail.com)
-    Date: 2017/03/12
+    Date: 2017/04/11
 """
 
 # import python internal libraries
@@ -22,7 +22,8 @@ from pandas.tslib import Timestamp
 
 # write functions
 def read_data(filename: str, header: int=None,
-              time_format: str='%m/%d/%y %I:%M:%S %p CST') -> DataFrame:
+              time_format: str='%m/%d/%y %I:%M:%S %p CST',
+              interpolation: bool=False, duration: bool=False) -> DataFrame:
     """
         This function reads the data in filename that is in specified format
         and returns a pandas dataframe with time data as the index and
@@ -44,6 +45,15 @@ def read_data(filename: str, header: int=None,
             format of string in time. Default '%m/%d/%y %I:%M:%S %p CST'
             Please check https://docs.python.org/3.5/library/datetime.html#strftime-and-strptime-behavior
             for details
+
+        interpolation: bool
+            if the code should conduct an interpolation for values that are
+            NaN in the sheet. Default False
+
+        duration: bool
+            if the code should calculate the duration of each point in the
+            time series and create a new column called 'Duration' in
+            seconds. Default False
     """
 
     # initialize the dataframe
@@ -55,16 +65,19 @@ def read_data(filename: str, header: int=None,
         with ExcelFile(filename) as xlsx:
             for sheet_name in xlsx.sheet_names:
                 pddf = read_excel(
-                    xlsx, sheet_name, header=header, names=['Time', 'CLG']
+                    xlsx, sheet_name, header=header
                 )
                 break
     elif ext == 'csv':
-        pddf = read_csv(filename, header=header, names=['Time', 'CLG'])
+        pddf = read_csv(filename, header=header)
     else:
         raise ValueError(''.join([
             'The file extension of the data file cannot be recognized by ',
             'data_read.read_data(). Exiting.......'
         ]))
+
+    # rename the first column name
+    pddf.columns = ['Time']+pddf.columns.tolist()[1:]
 
     # make time column as the index
     pddf.loc[:, 'Time'] = [
@@ -73,18 +86,17 @@ def read_data(filename: str, header: int=None,
     ]
     pddf.set_index('Time', inplace=True)
 
-    # invalidate extereme outliers
-    outlier_thres = pddf['CLG'].mean()+6*pddf['CLG'].std()
-    pddf.loc[pddf['CLG'] > outlier_thres, 'CLG'] = float('nan')
-
     # preprocessing by interpolating invalid columns
-    pddf.loc[:, 'CLG'] = check_nan(pddf['CLG'])
+    if interpolation:
+        for col in pddf.columns:
+            pddf.loc[:, col] = check_nan(pddf[col])
 
     # calculate the duration of each data point
-    pddf.loc[:, 'Duration'] = [
-        cal_each_duration(ind, timeind, pddf['CLG'])
-        for ind, timeind in enumerate(pddf['CLG'].index)
-    ]
+    if duration:
+        pddf.loc[:, 'Duration'] = [
+            cal_each_duration(ind, timeind, pddf[pddf.columns[0]])
+            for ind, timeind in enumerate(pddf[pddf.columns[0]].index)
+        ]
 
     return pddf
 
@@ -130,9 +142,9 @@ def check_nan(wseries: Series) -> Series:
             datetime.datetime object
     """
 
-    if len(wseries[Series([
-        (type(val) == str or isnan(val)) for val in wseries
-    ], index=wseries.index)]) == 0:
+    if len(wseries[Series([(
+            isinstance(val, str) or isnan(val)
+        ) for val in wseries], index=wseries.index)]) == 0:
         return wseries  # nothing to change
 
     # ensure that all are either float or nan
@@ -182,7 +194,6 @@ def check_nan(wseries: Series) -> Series:
                     wseries.index[ind+1],
                     wseries[ind+2], wseries[ind+1]
                 )
-    return wseries
 
     return wseries
 
@@ -219,19 +230,23 @@ if __name__ == '__main__':
 
     from os.path import basename
 
-    for testfilename in [
-        '../dat/load.csv', '../dat/load.xlsx',
-        '../dat/load_whead.xlsx', '../dat/load_whead.csv'
-    ]:
-        print('Testing file import by using ', testfilename)
-        if 'whead' in testfilename:
-            TEST_DF = read_data(testfilename, header=0)
-        else:
-            TEST_DF = read_data(testfilename, header=None)
-        assert TEST_DF.loc[TEST_DF.index[2], 'CLG'] == 1
-        assert isinstance(TEST_DF.index[0], Timestamp)
-        assert TEST_DF.loc[TEST_DF.index[0], 'Duration'] == 60*30
-        assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
-        assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
+    FILENAME = '../dat/fixed_time_interval.csv'
+    print('Testing file import by using ', FILENAME)
+    TEST_DF = read_data(FILENAME, header=None, duration=True,
+                        interpolation=True)
+    assert isinstance(TEST_DF.index[0], Timestamp)
+    assert TEST_DF.loc[TEST_DF.index[0], 'Duration'] == 60*30
+    assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
+    assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
+
+    FILENAME = '../dat/time_of_change.csv'
+    print('Testing file import by using ', FILENAME)
+    TEST_DF = read_data(FILENAME, header=0)
+    assert isinstance(TEST_DF.index[0], Timestamp)
+    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
+    assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
+    assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
+    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
+    assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
 
     print('All functions in', basename(__file__), 'are ok')
