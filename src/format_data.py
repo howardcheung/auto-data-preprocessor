@@ -21,7 +21,7 @@ from pandas import DataFrame
 # write functions
 def convert_df(datadf: DataFrame, start_time: datetime,
                end_time: datetime=None, interval: float=600,
-               step: bool=True) -> DataFrame:
+               step: bool=True, ini_val: int=1) -> DataFrame:
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
@@ -48,6 +48,13 @@ def convert_df(datadf: DataFrame, start_time: datetime,
         step: bool
             if the data should be considered to be step functions. Default
             True. Indeed this input won't work until further notice.
+
+        ini_val: int
+            the assumption to the initial value of a column if the start time
+            is before the occurrence of the initial value in the column.
+                1: Use the minimum value in the trend
+                2: Use the first value in the trend
+            Default 1
     """
 
     # calculate the ending index for the new dataframe
@@ -75,7 +82,7 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 if not isnan(datadf.loc[oldind, col]):
                     pos = oldind
                     break
-            if final_df.index[0] >= pos:
+            if final_df.index[0] >= pos or ini_val == 2:
                 final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
             else:
                 final_df.loc[final_df.index[0], col] = \
