@@ -168,7 +168,7 @@ class MainGUI(wx.Frame):
         self.start_mon.SetValue('1')
         # reset the last day of the month if needed
         self.start_mon.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
-        self.start_mon.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.start_mon.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
         ]), pos=(sec_blk+70, layer_depth+20))
@@ -178,7 +178,7 @@ class MainGUI(wx.Frame):
             choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
         )
         self.start_day.SetValue('1')
-        self.start_day.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.start_day.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Day'
         ]), pos=(sec_blk+70*2, layer_depth+20))
@@ -188,7 +188,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(24)], size=(50, 20)
         )
         self.start_hr.SetValue('00')
-        self.start_hr.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.start_hr.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Hour'
         ]), pos=(sec_blk+70*3, layer_depth+20))
@@ -198,7 +198,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(60)], size=(50, 20)
         )
         self.start_min.SetValue('00')
-        self.start_min.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.start_min.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
@@ -228,7 +228,7 @@ class MainGUI(wx.Frame):
         self.end_mon.SetValue('12')
         # reset the last day of the month if needed
         self.end_mon.Bind(wx.EVT_COMBOBOX, self.ChangeEndDayLimit)
-        self.end_mon.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.end_mon.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
         ]), pos=(sec_blk+70, layer_depth+20))
@@ -238,7 +238,7 @@ class MainGUI(wx.Frame):
             choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
         )
         self.end_day.SetValue('31')
-        self.end_day.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.end_day.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Day'
         ]), pos=(sec_blk+70*2, layer_depth+20))
@@ -248,7 +248,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(24)], size=(50, 20)
         )
         self.end_hr.SetValue('23')
-        self.end_hr.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.end_hr.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Hour'
         ]), pos=(sec_blk+70*3, layer_depth+20))
@@ -258,7 +258,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(60)], size=(50, 20)
         )
         self.end_min.SetValue('59')
-        self.end_min.Bind(wx.EVT_TEXT, self.SelfChecker)
+        self.end_min.SetEditable(False)
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
@@ -437,45 +437,6 @@ class MainGUI(wx.Frame):
         # remove days to fit monthrange
         while self.end_day.GetCount() > lastday:
             self.end_day.Delete(self.end_day.GetCount()-1)
-        evt.Skip()
-
-    def SelfChecker(self, evt):
-        """
-            Check values of ComboBoxes. If they do not match the
-            permissible values. Reset them to the first value available
-        """
-        if not self.start_mon.GetValue().isdigit() or \
-                int(self.start_mon.GetValue()) < 1 or \
-                int(self.start_mon.GetValue()) > 12:
-            self.start_mon.SetValue('1')
-        if not self.start_day.GetValue().isdigit() or \
-                int(self.start_day.GetValue()) < 1 or \
-                int(self.start_day.GetValue()) > 31:
-            self.start_day.SetValue('1')
-        if not self.start_hr.GetValue().isdigit() or \
-                int(self.start_hr.GetValue()) < 1 or \
-                int(self.start_hr.GetValue()) > 23:
-            self.start_hr.SetValue('00')
-        if not self.start_min.GetValue().isdigit() or \
-                int(self.start_min.GetValue()) < 1 or \
-                int(self.start_min.GetValue()) > 59:
-            self.start_min.SetValue('00')
-        if not self.end_mon.GetValue().isdigit() or \
-                int(self.end_mon.GetValue()) < 1 or \
-                int(self.end_mon.GetValue()) > 12:
-            self.end_mon.SetValue('1')
-        if not self.end_day.GetValue().isdigit() or \
-                int(self.end_day.GetValue()) < 1 or \
-                int(self.end_day.GetValue()) > 31:
-            self.end_day.SetValue('1')
-        if not self.end_hr.GetValue().isdigit() or \
-                int(self.end_hr.GetValue()) < 1 or \
-                int(self.end_hr.GetValue()) > 23:
-            self.end_hr.SetValue('00')
-        if not self.end_min.GetValue().isdigit() or \
-                int(self.end_min.GetValue()) < 1 or \
-                int(self.end_min.GetValue()) > 59:
-            self.end_min.SetValue('00')
         evt.Skip()
 
     def Analyzer(self, evt):
