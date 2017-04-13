@@ -38,7 +38,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(625, 500)
+            parent, title=title, size=(625, 550)
         )  # size of the application window
 
         self.initui()
@@ -261,7 +261,7 @@ class MainGUI(wx.Frame):
             pos=(sec_blk+50+10, layer_depth+2)
         )
 
-        # Changes
+        # Relationship between time series data points
         layer_depth += layer_diff
         wx.StaticText(
             panel, label=u'Assumption between data points:',
@@ -271,7 +271,36 @@ class MainGUI(wx.Frame):
             panel, value=u'Step Function',
             choices=[
                 u'Step Function', u'Continuous variable (coming soon)'
-            ], pos=(sec_blk, layer_depth), size=(40, 20)
+            ], pos=(sec_blk, layer_depth), size=(200, 20)
+        )
+
+        # Assumptions on extrapolation
+        layer_depth += layer_diff
+        wx.StaticText(
+            panel, label=u''.join([
+                u'Assumptions for data points\n',
+                u'earlier than the existing data:'
+            ]), pos=(first_blk, layer_depth+2)
+        )
+        self.early_pts = wx.ComboBox(
+            panel, value=u'Use the minimum value in the trend',
+            choices=[
+                u'Use the minimum value in the trend',
+                u'Use the first value in the trend'
+            ], pos=(sec_blk, layer_depth), size=(200, 20)
+        )
+
+        # Separator of output file
+        layer_depth += layer_diff
+        wx.StaticText(
+            panel, label=u''.join([
+                u'Separator of the output file:'
+            ]), pos=(first_blk, layer_depth+2)
+        )
+        # do not use unicode here
+        self.output_sep = wx.ComboBox(
+            panel, value=';', choices=[';', ','],
+            pos=(sec_blk, layer_depth), size=(50, 20)
         )
 
         # buttons at the bottom
