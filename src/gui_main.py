@@ -60,12 +60,7 @@ class MainGUI(wx.Frame):
         sec_blk = 200
         third_blk = 475
 
-        # sizer = wx.GridBagSizer(1, 1)  # making a grid in your box
-
         # title
-        # leave space at the top, left and bottom from the text to the
-        # other object
-
         # position: (from top to bottom, from left to right)
         wx.StaticText(panel, label=u''.join([
             u'Time-of-change value data to data',
@@ -116,6 +111,7 @@ class MainGUI(wx.Frame):
         layer_depth += layer_diff
 
         # Separator of output file
+        # can be any string, but provide the choices
         wx.StaticText(
             panel, label=u''.join([
                 u'Separator of the output file:'
@@ -123,7 +119,7 @@ class MainGUI(wx.Frame):
         )
         # do not use unicode here
         self.output_sep = wx.ComboBox(
-            panel, value=';', choices=[';', ','],
+            panel, value=',', choices=[';', ','],
             pos=(sec_blk, layer_depth), size=(50, 20)
         )
         layer_depth += layer_diff
@@ -171,6 +167,7 @@ class MainGUI(wx.Frame):
         self.start_mon.SetValue('1')
         # reset the last day of the month if needed
         self.start_mon.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
+        self.start_mon.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
         ]), pos=(sec_blk+70, layer_depth+20))
@@ -180,6 +177,7 @@ class MainGUI(wx.Frame):
             choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
         )
         self.start_day.SetValue('1')
+        self.start_day.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Day'
         ]), pos=(sec_blk+70*2, layer_depth+20))
@@ -189,6 +187,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(24)], size=(50, 20)
         )
         self.start_hr.SetValue('00')
+        self.start_hr.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Hour'
         ]), pos=(sec_blk+70*3, layer_depth+20))
@@ -198,6 +197,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(60)], size=(50, 20)
         )
         self.start_min.SetValue('00')
+        self.start_min.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
@@ -227,6 +227,7 @@ class MainGUI(wx.Frame):
         self.end_mon.SetValue('12')
         # reset the last day of the month if needed
         self.end_mon.Bind(wx.EVT_COMBOBOX, self.ChangeEndDayLimit)
+        self.end_mon.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
         ]), pos=(sec_blk+70, layer_depth+20))
@@ -236,6 +237,7 @@ class MainGUI(wx.Frame):
             choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
         )
         self.end_day.SetValue('31')
+        self.end_day.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Day'
         ]), pos=(sec_blk+70*2, layer_depth+20))
@@ -245,6 +247,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(24)], size=(50, 20)
         )
         self.end_hr.SetValue('23')
+        self.end_hr.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Hour'
         ]), pos=(sec_blk+70*3, layer_depth+20))
@@ -254,6 +257,7 @@ class MainGUI(wx.Frame):
             choices=['%02i' % ind for ind in range(60)], size=(50, 20)
         )
         self.end_min.SetValue('59')
+        self.end_min.Bind(wx.EVT_TEXT, self.SelfChecker)
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
@@ -321,6 +325,7 @@ class MainGUI(wx.Frame):
             Function to close the main window
         """
         self.Close(True)
+        evt.Skip()
 
     def OnOpen(self, evt):
         """
@@ -349,6 +354,7 @@ class MainGUI(wx.Frame):
         if not isfile(filepath):
             wx.LogError('Cannot open file "%s".' % openFileDialog.GetPath())
             return False
+        evt.Skip()
 
     def SaveOpen(self, evt):
         """
@@ -374,6 +380,7 @@ class MainGUI(wx.Frame):
         # this can be done with e.g. wxPython input streams:
         filepath = openFileDialog.GetPath()
         self.newdfpath.SetValue(filepath)
+        evt.Skip()
 
     def TimeInstruct(self, evt):
         """
@@ -385,6 +392,7 @@ class MainGUI(wx.Frame):
                 u'#strftime-and-strptime-behavior'
             ])
         )
+        evt.Skip()
 
     def ChangeStartDayLimit(self, evt):
         """
@@ -405,6 +413,7 @@ class MainGUI(wx.Frame):
         # remove days to fit monthrange
         while self.start_day.GetCount() > lastday:
             self.start_day.Delete(self.start_day.GetCount()-1)
+        evt.Skip()
 
     def ChangeEndDayLimit(self, evt):
         """
@@ -425,15 +434,64 @@ class MainGUI(wx.Frame):
         # remove days to fit monthrange
         while self.end_day.GetCount() > lastday:
             self.end_day.Delete(self.end_day.GetCount()-1)
+        evt.Skip()
+
+    def SelfChecker(self, evt):
+        """
+            Check values of ComboBoxes. If they do not match the
+            permissible values. Reset them to the first value available
+        """
+        if not self.start_mon.GetValue().isdigit() or \
+                int(self.start_mon.GetValue()) < 1 or \
+                int(self.start_mon.GetValue()) > 12:
+            self.start_mon.SetValue('1')
+        if not self.start_day.GetValue().isdigit() or \
+                int(self.start_day.GetValue()) < 1 or \
+                int(self.start_day.GetValue()) > 31:
+            self.start_day.SetValue('1')
+        if not self.start_hr.GetValue().isdigit() or \
+                int(self.start_hr.GetValue()) < 1 or \
+                int(self.start_hr.GetValue()) > 23:
+            self.start_hr.SetValue('00')
+        if not self.start_min.GetValue().isdigit() or \
+                int(self.start_min.GetValue()) < 1 or \
+                int(self.start_min.GetValue()) > 59:
+            self.start_min.SetValue('00')
+        if not self.end_mon.GetValue().isdigit() or \
+                int(self.end_mon.GetValue()) < 1 or \
+                int(self.end_mon.GetValue()) > 12:
+            self.end_mon.SetValue('1')
+        if not self.end_day.GetValue().isdigit() or \
+                int(self.end_day.GetValue()) < 1 or \
+                int(self.end_day.GetValue()) > 31:
+            self.end_day.SetValue('1')
+        if not self.end_hr.GetValue().isdigit() or \
+                int(self.end_hr.GetValue()) < 1 or \
+                int(self.end_hr.GetValue()) > 23:
+            self.end_hr.SetValue('00')
+        if not self.end_min.GetValue().isdigit() or \
+                int(self.end_min.GetValue()) < 1 or \
+                int(self.end_min.GetValue()) > 59:
+            self.end_min.SetValue('00')
+        evt.Skip()
 
     def Analyzer(self, evt):
         """
             Function to initiate the main analysis.
         """
+        # check all required inputs
+        if not isfile(self.dfpath.GetValue()):
+            wx.MessageBox(
+                u'Cannot open the data file!', u'Status',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            return
+
         # Run the analyzer
 
         # function to be called upon finishing processing
         wx.CallLater(0, self.ShowMessage)
+        evt.Skip()
 
 
 # define functions
