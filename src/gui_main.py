@@ -263,6 +263,18 @@ class MainGUI(wx.Frame):
             pos=(sec_blk+50+10, layer_depth+2)
         )
 
+        # Changes
+        layer_depth += layer_diff
+        wx.StaticText(
+            panel, label=u'Assumption between data points:',
+            pos=(first_blk, layer_depth)
+        )
+        self.func_choice = wx.ComboBox(
+            panel, value=u'Step Function',
+            choices=[u'Step Function', u'Continuous variable'],
+            pos=(sec_blk, layer_depth)
+        )
+
         # buttons at the bottom
         # button_ok = wx.Button(panel, label=u'Analysis')
         # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
