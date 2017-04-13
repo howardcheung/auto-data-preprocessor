@@ -11,6 +11,9 @@
 # import python internal libraries
 from datetime import datetime, timedelta
 from math import isnan
+from os import mkdir
+from os.path import dirname
+from pathlib import Path
 
 # import third party libraries
 from pandas import DataFrame
@@ -21,7 +24,8 @@ from pandas import DataFrame
 # write functions
 def convert_df(datadf: DataFrame, start_time: datetime,
                end_time: datetime=None, interval: float=600,
-               step: bool=True, ini_val: int=1) -> DataFrame:
+               step: bool=True, ini_val: int=1,
+               output_csv: str=None, sep: str=';') -> DataFrame:
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
@@ -55,6 +59,13 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 1: Use the minimum value in the trend
                 2: Use the first value in the trend
             Default 1
+
+        output_csv: str
+            the path where the dataframe should be output as a csv.
+            Default None: no output
+
+        sep: str
+            separator in the csv. Default ';'
     """
 
     # calculate the ending index for the new dataframe
@@ -89,8 +100,30 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                     datadf[col].dropna().unique().min()
 
         # continue to append new columns until the end
+        oldind = 0
+        newind = 1
+        oldlen = datadf.shape[0]
+        newlen = final_df.shape[0]
+        while newind < newlen:
+            if final_df.index[newind] < datadf.index[oldind]:
+                final_df.loc[final_df.index[newind], :] = \
+                    final_df.loc[final_df.index[newind-1], :]
+            else:
+                for col in final_df.columns:
+                    if isnan(datadf.loc[datadf.index[oldind], col]):
+                        final_df.loc[final_df.index[newind], col] = \
+                            final_df.loc[final_df.index[newind-1], col]
+                    else:
+                        final_df.loc[final_df.index[newind], col] = \
+                            datadf.loc[datadf.index[oldind], col]
+                if oldind < oldlen-1:
+                    oldind += 1
+            newind += 1
 
-        pass
+        # output new file
+        if output_csv is not None:
+            mkdir_if_not_exist(dirname(output_csv))
+            final_df.to_csv(output_csv, sep=sep)
     else:
         raise ValueError(u''.join([
             u'The interpolation function of format_data.convert_df is',
@@ -100,27 +133,60 @@ def convert_df(datadf: DataFrame, start_time: datetime,
     return final_df
 
 
+def mkdir_if_not_exist(usrpath):
+    """
+        Make a directory at usrpath if the directory does not exist
+
+        Inputs:
+        ==========
+        usrpath: str
+            position of the path
+    """
+
+    if not Path(usrpath).exists():
+        mkdir(usrpath)
+
+
 # testing functions
 if __name__ == '__main__':
 
     from os.path import basename
+    from os import remove
     from data_read import read_data
 
     # check function for computer-generated ending time
     FILENAME = '../dat/time_of_change.csv'
     TEST_DF = read_data(FILENAME, header=0)
-    NEW_DF = convert_df(TEST_DF, datetime(2011, 1, 11, 0, 0))
+    NEW_DF = convert_df(TEST_DF, datetime(2011, 1, 1, 0, 0))
     assert isinstance(NEW_DF, DataFrame)
     assert NEW_DF.index[-1] <= TEST_DF.index[-1]
     assert NEW_DF.index[-1] >= TEST_DF.index[-2]
 
     # check function for new ending time
     NEW_DF = convert_df(
-        TEST_DF, datetime(2011, 1, 1, 0, 0), datetime(2011, 12, 31, 11, 50)
+        TEST_DF, datetime(2011, 1, 1, 0, 0), datetime(2011, 1, 3, 11, 50),
+        output_csv='../testresult.csv'
     )
-    print(NEW_DF)
-    assert NEW_DF.index[-1] == datetime(2011, 12, 31, 11, 50)
+    assert Path('../testresult.csv').exists()
+    remove('../testresult.csv')
+    assert NEW_DF.index[-1] == datetime(2011, 1, 3, 11, 50)
     assert NEW_DF.loc[NEW_DF.index[0], 'Item 4'] == 0.0
     assert NEW_DF.loc[NEW_DF.index[0], 'Item 3'] == 0.0
+    # check function of the correction
+    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 1'] == 0.0
+    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 2'] == 1.0
+    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 3'] == 0.0
+    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 4'] == 0.0
 
+    # check function with new initial values    
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2011, 1, 1, 0, 0), datetime(2011, 1, 3, 11, 50),
+        ini_val=2
+    )
+    # check function of the correction
+    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 1'] == 1.0
+    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 2'] == 1.0
+    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 3'] == 1.0
+    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 4'] == 0.0
+    
     print('All functions in', basename(__file__), 'are ok')
