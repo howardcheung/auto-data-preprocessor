@@ -51,7 +51,7 @@ class MainGUI(wx.Frame):
         # define the panel
         panel = wx.Panel(self)
 
-        sizer = wx.GridBagSizer(6, 5)  # making a grid in your box
+        sizer = wx.GridBagSizer(1, 1)  # making a grid in your box
 
         # title
         # leave space at the top, left and bottom from the text to the
@@ -144,7 +144,11 @@ class MainGUI(wx.Frame):
         )
 
         # create check boxes for the date and time
-        self.start_yr = 
+        self.start_yr = wx.SpinCtrl(panel, value='2016', min=1, max=4000)
+        sizer.Add(
+            self.start_yr, pos=(6, 1), flag=wx.TOP | wx.EXPAND,
+            border=10
+        )
 
         # buttons at the bottom
         # button_ok = wx.Button(panel, label=u'Analysis')
