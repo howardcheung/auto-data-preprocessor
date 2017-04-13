@@ -73,8 +73,10 @@ class MainGUI(wx.Frame):
         ]), pos=(first_blk, begin_depth))
 
         # Inputs to the data file path
+        layer_depth = begin_depth+layer_diff
         text = wx.StaticText(
-            panel, label=u'Data file path:', pos=(first_blk, begin_depth+layer_diff)
+            panel, label=u'Data file path:',
+            pos=(first_blk, layer_depth)
         )
 
         # require additional object for textbox
@@ -84,74 +86,76 @@ class MainGUI(wx.Frame):
             pos=(sec_blk, begin_depth+layer_diff), size=(250, 20)
         )
         button = wx.Button(
-            panel, label=u'Browse...', pos=(third_blk, begin_depth+layer_diff)
+            panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
         button.Bind(wx.EVT_BUTTON, self.OnOpen)
 
         # ask for existence of header as a checkbox
+        layer_depth = begin_depth+layer_diff*2
         text = wx.StaticText(
             panel, label=u'Existence of a header row:',
-            pos=(first_blk, begin_depth+layer_diff*2)
+            pos=(first_blk, layer_depth)
         )
-        self.header = wx.CheckBox(
-            panel, pos=(sec_blk, begin_depth+layer_diff*2)
-        )
+        self.header = wx.CheckBox(panel, pos=(sec_blk, layer_depth))
         self.header.SetValue(True)
 
         # Inputs to the directory to save the plots
+        layer_depth = begin_depth+layer_diff*3
         text = wx.StaticText(
-            panel, label=u'Path to save file:',
-            pos=(first_blk, begin_depth+layer_diff*3)
+            panel, label=u'Path to save file:', pos=(first_blk, layer_depth)
         )
 
         # require additional object for textbox
         # with default path
         self.newdfpath = wx.TextCtrl(
             panel, value=u'../testplots/example.csv',
-            pos=(sec_blk, begin_depth+layer_diff*3), size=(250, 20)
+            pos=(sec_blk, layer_depth), size=(250, 20)
         )
         button = wx.Button(
-            panel, label=u'Browse...', pos=(third_blk, begin_depth+layer_diff*3)
+            panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
         button.Bind(wx.EVT_BUTTON, self.SaveOpen)
 
         # Inputs to the format time string
+        layer_depth = begin_depth+layer_diff*4
         text = wx.StaticText(panel, label=u''.join([
             u'Format of time string \nin the first column:'
-        ]), pos=(first_blk, begin_depth+layer_diff*4))
+        ]), pos=(first_blk, layer_depth))
 
         # # require additional object for textbox
         self.timestring = wx.TextCtrl(
             panel, value=u'%m/%d/%y %I:%M:%S %p CST',
-            pos=(sec_blk, begin_depth+layer_diff*4), size=(250, 20)
+            pos=(sec_blk, layer_depth), size=(250, 20)
         )
 
         # a button for instructions
         button = wx.Button(
             panel,
             label=u'Instructions to enter the format of the time string',
-            pos=(sec_blk, begin_depth+layer_diff*4+20)
+            pos=(sec_blk, layer_depth+20)
         )
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
 
-        # add start time check boxes
+        # add start time input
+        layer_depth = begin_depth+layer_diff*5+20
         text = wx.StaticText(panel, label=u''.join([
             u'Start time in the new data file:'
-        ]), pos=(first_blk, begin_depth+layer_diff*5+20))
+            u'\n(inaccurate for too much extension)'
+        ]), pos=(first_blk, layer_depth))
 
         # create spin control for the date and time
         self.start_yr = wx.SpinCtrl(
             panel, value='2017', min=1, max=4000,
-            pos=(sec_blk, begin_depth+layer_diff*5+20), size=(50, 20)
+            pos=(sec_blk, layer_depth), size=(50, 20)
         )
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
-        ]), pos=(sec_blk, begin_depth+layer_diff*5+40))
+        ]), pos=(sec_blk, layer_depth+20))
         # reset the last day of the month if needed
         self.start_yr.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
 
         self.start_mon = wx.ComboBox(
-            panel, pos=(sec_blk+70, begin_depth+layer_diff*5+20),
+            panel, pos=(sec_blk+70, layer_depth),
             choices=[str(ind) for ind in range(1, 13)], size=(50, 20)
         )
         self.start_mon.SetValue('1')
@@ -159,34 +163,90 @@ class MainGUI(wx.Frame):
         self.start_mon.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
-        ]), pos=(sec_blk+70, begin_depth+layer_diff*5+40))
+        ]), pos=(sec_blk+70, layer_depth+20))
 
         self.start_day = wx.ComboBox(
-            panel, pos=(sec_blk+70*2, begin_depth+layer_diff*5+20),
+            panel, pos=(sec_blk+70*2, layer_depth),
             choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
         )
         self.start_day.SetValue('1')
         text = wx.StaticText(panel, label=u''.join([
             u'Day'
-        ]), pos=(sec_blk+70*2, begin_depth+layer_diff*5+40))
+        ]), pos=(sec_blk+70*2, layer_depth+20))
 
         self.start_hr = wx.ComboBox(
-            panel, pos=(sec_blk+70*3, begin_depth+layer_diff*5+20),
+            panel, pos=(sec_blk+70*3, layer_depth),
             choices=['%02i' % ind for ind in range(24)], size=(50, 20)
         )
         self.start_hr.SetValue('00')
         text = wx.StaticText(panel, label=u''.join([
             u'Hour'
-        ]), pos=(sec_blk+70*3, begin_depth+layer_diff*5+40))
+        ]), pos=(sec_blk+70*3, layer_depth+20))
 
         self.start_min = wx.ComboBox(
-            panel, pos=(sec_blk+70*4, begin_depth+layer_diff*5+20),
+            panel, pos=(sec_blk+70*4, layer_depth),
             choices=['%02i' % ind for ind in range(60)], size=(50, 20)
         )
         self.start_min.SetValue('00')
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
-        ]), pos=(sec_blk+70*4, begin_depth+layer_diff*5+40))
+        ]), pos=(sec_blk+70*4, layer_depth+20))
+
+        # add ending time input
+        layer_depth = begin_depth+layer_diff*6+40
+        text = wx.StaticText(panel, label=u''.join([
+            u'Ending time in the new data file:',
+            u'\n(inaccurate for too much extension)'
+        ]), pos=(first_blk, layer_depth))
+
+        # create spin control for the date and time
+        self.end_yr = wx.SpinCtrl(
+            panel, value='2017', min=1, max=4000,
+            pos=(sec_blk, layer_depth), size=(50, 20)
+        )
+        text = wx.StaticText(panel, label=u''.join([
+            u'Year'
+        ]), pos=(sec_blk, layer_depth+20))
+        # reset the last day of the month if needed
+        self.end_yr.Bind(wx.EVT_COMBOBOX, self.ChangeEndDayLimit)
+
+        self.end_mon = wx.ComboBox(
+            panel, pos=(sec_blk+70, layer_depth),
+            choices=[str(ind) for ind in range(1, 13)], size=(50, 20)
+        )
+        self.end_mon.SetValue('12')
+        # reset the last day of the month if needed
+        self.end_mon.Bind(wx.EVT_COMBOBOX, self.ChangeEndDayLimit)
+        text = wx.StaticText(panel, label=u''.join([
+            u'Month'
+        ]), pos=(sec_blk+70, layer_depth+20))
+
+        self.end_day = wx.ComboBox(
+            panel, pos=(sec_blk+70*2, layer_depth),
+            choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
+        )
+        self.end_day.SetValue('31')
+        text = wx.StaticText(panel, label=u''.join([
+            u'Day'
+        ]), pos=(sec_blk+70*2, layer_depth+20))
+
+        self.end_hr = wx.ComboBox(
+            panel, pos=(sec_blk+70*3, layer_depth),
+            choices=['%02i' % ind for ind in range(24)], size=(50, 20)
+        )
+        self.end_hr.SetValue('23')
+        text = wx.StaticText(panel, label=u''.join([
+            u'Hour'
+        ]), pos=(sec_blk+70*3, layer_depth+20))
+
+        self.end_min = wx.ComboBox(
+            panel, pos=(sec_blk+70*4, layer_depth),
+            choices=['%02i' % ind for ind in range(60)], size=(50, 20)
+        )
+        self.end_min.SetValue('59')
+        text = wx.StaticText(panel, label=u''.join([
+            u'Minutes'
+        ]), pos=(sec_blk+70*4, layer_depth+20))
         
 
         # buttons at the bottom
@@ -291,6 +351,26 @@ class MainGUI(wx.Frame):
         # remove days to fit monthrange
         while self.start_day.GetCount() > lastday:
             self.start_day.Delete(self.start_day.GetCount()-1)
+
+    def ChangeEndDayLimit(self, evt):
+        """
+            Function to change the limit of the starting day selection
+            based on the selection of the year and the month
+        """
+        # find the number of days based on the current configuration
+        lastday = monthrange(
+            int(self.end_yr.GetValue()), int(self.end_mon.GetValue())
+        )[1]
+        # check the current selection. Set it to the last day of the month
+        # if the current selection exceed the new last day
+        if int(self.end_day.GetValue()) > lastday:
+            self.end_day.SetValue(str(lastday))
+        # add days to fit monthrange
+        while self.end_day.GetCount() < lastday:
+            self.end_day.Append(str(self.end_day.GetCount()+1))
+        # remove days to fit monthrange
+        while self.end_day.GetCount() > lastday:
+            self.end_day.Delete(self.end_day.GetCount()-1)
 
     def Analyzer(self, evt):
         """
