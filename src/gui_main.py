@@ -135,6 +135,17 @@ class MainGUI(wx.Frame):
             button, pos=(5, 1), span=(1, 2)
         )
 
+        # add start time check boxes
+        text = wx.StaticText(panel, label=u''.join([
+            u'Start time in the new data file:'
+        ]))
+        sizer.Add(
+            text, pos=(6, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=10
+        )
+
+        # create check boxes for the date and time
+        self.start_yr = 
+
         # buttons at the bottom
         # button_ok = wx.Button(panel, label=u'Analysis')
         # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
