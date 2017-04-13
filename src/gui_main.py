@@ -39,7 +39,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(625, 550)
+            parent, title=title, size=(625, 600)
         )  # size of the application window
 
         self.initui()
@@ -311,9 +311,11 @@ class MainGUI(wx.Frame):
         layer_depth += layer_diff
 
         # buttons at the bottom
-        # button_ok = wx.Button(panel, label=u'Analysis')
-        # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
-        # sizer.Add(button_ok, pos=(8, 4))
+        button_ok = wx.Button(
+            panel, label=u'Preprocess', pos=(500, layer_depth)
+        )
+        button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
+        layer_depth += layer_diff
 
     def ShowMessage(self):
         """
@@ -357,7 +359,6 @@ class MainGUI(wx.Frame):
         if not isfile(filepath):
             wx.LogError('Cannot open file "%s".' % openFileDialog.GetPath())
             return False
-        evt.Skip()
 
     def SaveOpen(self, evt):
         """
@@ -383,7 +384,6 @@ class MainGUI(wx.Frame):
         # this can be done with e.g. wxPython input streams:
         filepath = openFileDialog.GetPath()
         self.newdfpath.SetValue(filepath)
-        evt.Skip()
 
     def TimeInstruct(self, evt):
         """
@@ -395,7 +395,6 @@ class MainGUI(wx.Frame):
                 u'#strftime-and-strptime-behavior'
             ])
         )
-        evt.Skip()
 
     def ChangeStartDayLimit(self, evt):
         """
@@ -447,36 +446,48 @@ class MainGUI(wx.Frame):
         # check the existence of the folder
         if not isfile(self.dfpath.GetValue()):
             wx.MessageBox(
-                u'Cannot open the data file!', u'Status',
+                u'Cannot open the data file!', u'Error',
                 wx.OK | wx.ICON_INFORMATION
             )
             return
         # check the existence of the saving path
         if not Path(dirname(self.newdfpath.GetValue())).exists():
-            wx.MessageBox(
-                u'Saving directory does not exist!', u'Status',
+            box = wx.MessageDialog(
+                self, u'Saving directory does not exist!', u'Error',
                 wx.OK | wx.ICON_INFORMATION
             )
+            box.Fit()
+            box.ShowModal()
             return
         # check the time
         start_time = datetime(
-            int(self.start_year), int(self.start_mon), int(self.start_day),
-            int(self.start_hr), int(self.start_min)
+            int(self.start_yr.GetValue()), int(self.start_mon.GetValue()),
+            int(self.start_day.GetValue()), int(self.start_hr.GetValue()),
+            int(self.start_min.GetValue())
         )
         end_time = datetime(
-            int(self.end_year), int(self.end_mon), int(self.end_day),
-            int(self.end_hr), int(self.end_min)
+            int(self.end_yr.GetValue()), int(self.end_mon.GetValue()),
+            int(self.end_day.GetValue()), int(self.end_hr.GetValue()),
+            int(self.end_min.GetValue())
         )
         if start_time > end_time:
             wx.MessageBox(
-                u'Starting time later than ending time!', u'Status',
+                u'Starting time later than ending time!', u'Error',
                 wx.OK | wx.ICON_INFORMATION
             )
             return
-        
-            
 
         # Run the analyzer
+        # output any error to a message box if needed
+        try:
+            pass
+        except:
+            box = wx.MessageDialog(
+                self, str(e), u'Error', wx.OK | wx.ICON_INFORMATION
+            )
+            box.Fit()
+            box.ShowModal()
+            return
 
         # function to be called upon finishing processing
         wx.CallLater(0, self.ShowMessage)
