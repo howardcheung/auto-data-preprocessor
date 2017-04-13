@@ -76,7 +76,7 @@ class MainGUI(wx.Frame):
         layer_depth = begin_depth+layer_diff
         text = wx.StaticText(
             panel, label=u'Data file path:',
-            pos=(first_blk, layer_depth)
+            pos=(first_blk, layer_depth+2)
         )
 
         # require additional object for textbox
@@ -94,7 +94,7 @@ class MainGUI(wx.Frame):
         layer_depth = begin_depth+layer_diff*2
         text = wx.StaticText(
             panel, label=u'Existence of a header row:',
-            pos=(first_blk, layer_depth)
+            pos=(first_blk, layer_depth+2)
         )
         self.header = wx.CheckBox(panel, pos=(sec_blk, layer_depth))
         self.header.SetValue(True)
@@ -102,9 +102,8 @@ class MainGUI(wx.Frame):
         # Inputs to the directory to save the plots
         layer_depth += layer_diff
         text = wx.StaticText(
-            panel, label=u'Path to save file:', pos=(first_blk, layer_depth)
+            panel, label=u'Path to save file:', pos=(first_blk, layer_depth+2)
         )
-
         # require additional object for textbox
         # with default path
         self.newdfpath = wx.TextCtrl(
@@ -120,14 +119,13 @@ class MainGUI(wx.Frame):
         layer_depth += layer_diff
         text = wx.StaticText(panel, label=u''.join([
             u'Format of time string \nin the first column:'
-        ]), pos=(first_blk, layer_depth))
+        ]), pos=(first_blk, layer_depth+2))
 
         # # require additional object for textbox
         self.timestring = wx.TextCtrl(
             panel, value=u'%m/%d/%y %I:%M:%S %p CST',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
-
         # a button for instructions
         button = wx.Button(
             panel,
@@ -141,7 +139,7 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Start time in the new data file:'
             u'\n(inaccurate for too much extension)'
-        ]), pos=(first_blk, layer_depth))
+        ]), pos=(first_blk, layer_depth+2))
 
         # create spin control for the date and time
         self.start_yr = wx.SpinCtrl(
@@ -197,7 +195,7 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Ending time in the new data file:',
             u'\n(inaccurate for too much extension)'
-        ]), pos=(first_blk, layer_depth))
+        ]), pos=(first_blk, layer_depth+2))
 
         # create spin control for the date and time
         self.end_yr = wx.SpinCtrl(
@@ -252,7 +250,7 @@ class MainGUI(wx.Frame):
         layer_depth += (layer_diff+20)
         text = wx.StaticText(
             panel, label=u'New time interval:',
-            pos=(first_blk, layer_depth)
+            pos=(first_blk, layer_depth+2)
         )
         self.time_int = wx.SpinCtrl(
             panel, value='10', min=1, max=31*24*60,  # max: approx. 1 month
@@ -267,12 +265,13 @@ class MainGUI(wx.Frame):
         layer_depth += layer_diff
         wx.StaticText(
             panel, label=u'Assumption between data points:',
-            pos=(first_blk, layer_depth)
+            pos=(first_blk, layer_depth+2)
         )
         self.func_choice = wx.ComboBox(
             panel, value=u'Step Function',
-            choices=[u'Step Function', u'Continuous variable'],
-            pos=(sec_blk, layer_depth)
+            choices=[
+                u'Step Function', u'Continuous variable (coming soon)'
+            ], pos=(sec_blk, layer_depth), size=(40, 20)
         )
 
         # buttons at the bottom
