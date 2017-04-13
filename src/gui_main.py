@@ -12,12 +12,15 @@ from calendar import monthrange
 from datetime import datetime
 from os.path import isfile, dirname
 from pathlib import Path
+from traceback import format_exc
 from webbrowser import open as webbrowseropen
 
 # import third party modules
 import wx
 
 # import user-defined modules
+from data_read import read_data
+from format_data import convert_df
 
 
 # define global variables
@@ -102,7 +105,7 @@ class MainGUI(wx.Frame):
         # require additional object for textbox
         # with default path
         self.newdfpath = wx.TextCtrl(
-            panel, value=u'../testplots/example.csv',
+            panel, value=u'./example.csv',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
         button = wx.Button(
@@ -290,6 +293,7 @@ class MainGUI(wx.Frame):
                 u'Step Function', u'Continuous variable (coming soon)'
             ], pos=(sec_blk, layer_depth), size=(200, 20)
         )
+        self.func_choice.SetSelection(0)
         self.func_choice.SetEditable(False)
         layer_depth += layer_diff
 
@@ -307,6 +311,7 @@ class MainGUI(wx.Frame):
                 u'Use the first value in the trend'
             ], pos=(sec_blk, layer_depth), size=(200, 20)
         )
+        self.early_pts.SetSelection(0)
         self.early_pts.SetEditable(False)
         layer_depth += layer_diff
 
@@ -480,10 +485,22 @@ class MainGUI(wx.Frame):
         # Run the analyzer
         # output any error to a message box if needed
         try:
-            pass
-        except:
+            datadf = read_data(
+                self.dfpath.GetValue(),
+                header=(0 if self.header.GetValue() else None),
+                time_format=self.timestring.GetValue()
+            )
+            convert_df(
+               datadf, start_time, end_time,
+               interval=int(self.time_int.GetValue())*60,
+               step=(True if self.func_choice.GetSelection()==0 else False),
+               ini_val=self.early_pts.GetSelection()+1,
+               output_csv=self.newdfpath.GetValue(),
+               sep=self.output_sep.GetValue()
+            )
+        except BaseException:
             box = wx.MessageDialog(
-                self, str(e), u'Error', wx.OK | wx.ICON_INFORMATION
+                self, format_exc(), u'Error', wx.OK | wx.ICON_INFORMATION
             )
             box.Fit()
             box.ShowModal()
