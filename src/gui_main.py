@@ -54,6 +54,9 @@ class MainGUI(wx.Frame):
         # define layer size
         begin_depth = 20
         layer_diff = 40
+        first_blk = 20
+        second_blk = 200
+        third_blk = 475
 
         # sizer = wx.GridBagSizer(1, 1)  # making a grid in your box
 
@@ -66,24 +69,11 @@ class MainGUI(wx.Frame):
             u'Time-of-change value data to data',
             u'at constant time intervals'
         ]), pos=(20, begin_depth))
-        # sizer.Add(
-            # wx.StaticText(panel, label=u''.join([
-                # u'Time-of-change value data to data\n',
-                # u'at constant time intervals'
-            # ])),
-            # pos=(0, 0),  # position: (from top to bottom, from left to right)
-            # flag=wx.TOP | wx.LEFT | wx.BOTTOM,
-            # border=10  # border required for flag indicators
-        # )
 
         # Inputs to the data file path
         text = wx.StaticText(
             panel, label=u'Data file path:', pos=(20, begin_depth+layer_diff)
         )
-        # text = wx.StaticText(panel, label=u'Data file path:')
-        # sizer.Add(
-            # text, pos=(1, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=10
-        # )
 
         # require additional object for textbox
         # with default path
@@ -91,39 +81,26 @@ class MainGUI(wx.Frame):
             panel, value=u'../dat/time_of_change.csv',
             pos=(200, begin_depth+layer_diff), size=(250, 20)
         )
-        # self.dfpath = wx.TextCtrl(panel, value=u'../dat/time_of_change.csv')
-        # sizer.Add(
-            # self.dfpath, pos=(1, 1), span=(1, 3), flag=wx.TOP | wx.EXPAND,
-            # border=10
-        # )
         button = wx.Button(
             panel, label=u'Browse...', pos=(475, begin_depth+layer_diff)
         )
         button.Bind(wx.EVT_BUTTON, self.OnOpen)
-        # sizer.Add(button, pos=(1, 4), flag=wx.TOP | wx.RIGHT, border=10)
 
         # ask for existence of header as a checkbox
         text = wx.StaticText(
             panel, label=u'Existence of a header row:',
             pos=(20, begin_depth+layer_diff*2)
         )
-        # sizer.Add(
-            # text, pos=(2, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=10
-        # )
         self.header = wx.CheckBox(
             panel, pos=(200, begin_depth+layer_diff*2)
         )
         self.header.SetValue(True)
-        # sizer.Add(self.header, pos=(2, 1), flag=wx.TOP | wx.RIGHT, border=10)
 
         # Inputs to the directory to save the plots
         text = wx.StaticText(
             panel, label=u'Path to save file:',
             pos=(20, begin_depth+layer_diff*3)
         )
-        # sizer.Add(
-            # text, pos=(3, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=10
-        # )
 
         # require additional object for textbox
         # with default path
@@ -135,31 +112,17 @@ class MainGUI(wx.Frame):
             panel, label=u'Browse...', pos=(475, begin_depth+layer_diff*3)
         )
         button.Bind(wx.EVT_BUTTON, self.SaveOpen)
-        # sizer.Add(
-            # self.newdfpath, pos=(3, 1), span=(1, 3), flag=wx.TOP | wx.EXPAND,
-            # border=10
-        # )
-        # button = wx.Button(panel, label=u'Browse...')
-        # button.Bind(wx.EVT_BUTTON, self.SaveOpen)
-        # sizer.Add(button, pos=(3, 4), flag=wx.TOP | wx.RIGHT, border=10)
 
         # Inputs to the format time string
         text = wx.StaticText(panel, label=u''.join([
             u'Format of time string \nin the first column:'
         ]), pos=(20, begin_depth+layer_diff*4))
-        # sizer.Add(
-            # text, pos=(4, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=10
-        # )
 
         # # require additional object for textbox
         self.timestring = wx.TextCtrl(
             panel, value=u'%m/%d/%y %I:%M:%S %p CST',
             pos=(200, begin_depth+layer_diff*4), size=(250, 20)
         )
-        # sizer.Add(
-            # self.timestring, pos=(4, 1), span=(1, 3), flag=wx.TOP | wx.EXPAND,
-            # border=10
-        # )
 
         # a button for instructions
         button = wx.Button(
@@ -168,43 +131,41 @@ class MainGUI(wx.Frame):
             pos=(200, begin_depth+layer_diff*4+20)
         )
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
-        # button = wx.Button(
-            # panel,
-            # label=u'Instructions to enter the format of the time string'
-        # )
-        # button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
-        # sizer.Add(
-            # button, pos=(5, 1), span=(1, 2)
-        # )
 
         # add start time check boxes
         text = wx.StaticText(panel, label=u''.join([
             u'Start time in the new data file:'
         ]), pos=(20, begin_depth+layer_diff*5+20))
-        # sizer.Add(
-            # text, pos=(6, 0), flag=wx.TOP | wx.LEFT | wx.BOTTOM, border=10
-        # )
 
-        # create check boxes for the date and time
+        # create spin control for the date and time
         self.start_yr = wx.SpinCtrl(
-            panel, value='2016', min=1, max=4000,
+            panel, value='2017', min=1, max=4000,
             pos=(200, begin_depth+layer_diff*5+20), size=(50, 20)
         )
-        # self.start_yr = wx.SpinCtrl(panel, value='2016', min=1, max=4000)
-        # sizer.Add(
-            # self.start_yr, pos=(6, 1), flag=wx.TOP | wx.EXPAND,
-            # border=10
-        # )
+        text = wx.StaticText(panel, label=u''.join([
+            u'Year'
+        ]), pos=(200, begin_depth+layer_diff*5+40))
+        self.start_mon = wx.ComboBox(
+            panel, pos=(270, begin_depth+layer_diff*5+20), size=(50, 20),
+            choices=[str(ind) for ind in range(1, 13)]
+        )
+        self.start_mon.SetValue('1')
+        text = wx.StaticText(panel, label=u''.join([
+            u'Month'
+        ]), pos=(270, begin_depth+layer_diff*5+40))
+        self.start_day = wx.ComboBox(
+            panel, pos=(270, begin_depth+layer_diff*5+20), size=(50, 20),
+            choices=[str(ind) for ind in range(1, 13)]
+        )
+        text = wx.StaticText(panel, label=u''.join([
+            u'Month'
+        ]), pos=(270, begin_depth+layer_diff*5+40))
+        
 
         # buttons at the bottom
         # button_ok = wx.Button(panel, label=u'Analysis')
         # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
         # sizer.Add(button_ok, pos=(8, 4))
-
-        # sizing of the window
-        # sizer.AddGrowableCol(2)  # expand to meet the window?
-
-        # panel.SetSizer(sizer)
 
     def ShowMessage(self):
         """
