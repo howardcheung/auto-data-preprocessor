@@ -55,7 +55,7 @@ class MainGUI(wx.Frame):
         begin_depth = 20
         layer_diff = 40
         first_blk = 20
-        second_blk = 200
+        sec_blk = 200
         third_blk = 475
 
         # sizer = wx.GridBagSizer(1, 1)  # making a grid in your box
@@ -68,98 +68,99 @@ class MainGUI(wx.Frame):
         wx.StaticText(panel, label=u''.join([
             u'Time-of-change value data to data',
             u'at constant time intervals'
-        ]), pos=(20, begin_depth))
+        ]), pos=(first_blk, begin_depth))
 
         # Inputs to the data file path
         text = wx.StaticText(
-            panel, label=u'Data file path:', pos=(20, begin_depth+layer_diff)
+            panel, label=u'Data file path:', pos=(first_blk, begin_depth+layer_diff)
         )
 
         # require additional object for textbox
         # with default path
         self.dfpath = wx.TextCtrl(
             panel, value=u'../dat/time_of_change.csv',
-            pos=(200, begin_depth+layer_diff), size=(250, 20)
+            pos=(sec_blk, begin_depth+layer_diff), size=(250, 20)
         )
         button = wx.Button(
-            panel, label=u'Browse...', pos=(475, begin_depth+layer_diff)
+            panel, label=u'Browse...', pos=(third_blk, begin_depth+layer_diff)
         )
         button.Bind(wx.EVT_BUTTON, self.OnOpen)
 
         # ask for existence of header as a checkbox
         text = wx.StaticText(
             panel, label=u'Existence of a header row:',
-            pos=(20, begin_depth+layer_diff*2)
+            pos=(first_blk, begin_depth+layer_diff*2)
         )
         self.header = wx.CheckBox(
-            panel, pos=(200, begin_depth+layer_diff*2)
+            panel, pos=(sec_blk, begin_depth+layer_diff*2)
         )
         self.header.SetValue(True)
 
         # Inputs to the directory to save the plots
         text = wx.StaticText(
             panel, label=u'Path to save file:',
-            pos=(20, begin_depth+layer_diff*3)
+            pos=(first_blk, begin_depth+layer_diff*3)
         )
 
         # require additional object for textbox
         # with default path
         self.newdfpath = wx.TextCtrl(
             panel, value=u'../testplots/example.csv',
-            pos=(200, begin_depth+layer_diff*3), size=(250, 20)
+            pos=(sec_blk, begin_depth+layer_diff*3), size=(250, 20)
         )
         button = wx.Button(
-            panel, label=u'Browse...', pos=(475, begin_depth+layer_diff*3)
+            panel, label=u'Browse...', pos=(third_blk, begin_depth+layer_diff*3)
         )
         button.Bind(wx.EVT_BUTTON, self.SaveOpen)
 
         # Inputs to the format time string
         text = wx.StaticText(panel, label=u''.join([
             u'Format of time string \nin the first column:'
-        ]), pos=(20, begin_depth+layer_diff*4))
+        ]), pos=(first_blk, begin_depth+layer_diff*4))
 
         # # require additional object for textbox
         self.timestring = wx.TextCtrl(
             panel, value=u'%m/%d/%y %I:%M:%S %p CST',
-            pos=(200, begin_depth+layer_diff*4), size=(250, 20)
+            pos=(sec_blk, begin_depth+layer_diff*4), size=(250, 20)
         )
 
         # a button for instructions
         button = wx.Button(
             panel,
             label=u'Instructions to enter the format of the time string',
-            pos=(200, begin_depth+layer_diff*4+20)
+            pos=(sec_blk, begin_depth+layer_diff*4+20)
         )
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
 
         # add start time check boxes
         text = wx.StaticText(panel, label=u''.join([
             u'Start time in the new data file:'
-        ]), pos=(20, begin_depth+layer_diff*5+20))
+        ]), pos=(first_blk, begin_depth+layer_diff*5+20))
 
         # create spin control for the date and time
         self.start_yr = wx.SpinCtrl(
             panel, value='2017', min=1, max=4000,
-            pos=(200, begin_depth+layer_diff*5+20), size=(50, 20)
+            pos=(sec_blk, begin_depth+layer_diff*5+20), size=(50, 20)
         )
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
-        ]), pos=(200, begin_depth+layer_diff*5+40))
+        ]), pos=(sec_blk, begin_depth+layer_diff*5+40))
         self.start_mon = wx.ComboBox(
-            panel, pos=(270, begin_depth+layer_diff*5+20), size=(50, 20),
-            choices=[str(ind) for ind in range(1, 13)]
+            panel, pos=(sec_blk+70, begin_depth+layer_diff*5+20),
+            choices=[str(ind) for ind in range(1, 13)], size=(50, 20)
         )
         self.start_mon.SetValue('1')
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
-        ]), pos=(270, begin_depth+layer_diff*5+40))
+        ]), pos=(sec_blk+70, begin_depth+layer_diff*5+40))
         self.start_day = wx.ComboBox(
-            panel, pos=(270, begin_depth+layer_diff*5+20), size=(50, 20),
-            choices=[str(ind) for ind in range(1, 13)]
+            panel, pos=(sec_blk+70*2, begin_depth+layer_diff*5+20),
+            choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
         )
+        self.start_day.SetValue('1')
         text = wx.StaticText(panel, label=u''.join([
-            u'Month'
-        ]), pos=(270, begin_depth+layer_diff*5+40))
+            u'Day'
+        ]), pos=(sec_blk+70*2, begin_depth+layer_diff*5+40))
         
 
         # buttons at the bottom
