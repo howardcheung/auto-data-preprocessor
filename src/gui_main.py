@@ -78,8 +78,6 @@ class MainGUI(wx.Frame):
             panel, label=u'Data file path:',
             pos=(first_blk, layer_depth+2)
         )
-        layer_depth += layer_diff
-
         # require additional object for textbox
         # with default path
         self.dfpath = wx.TextCtrl(
@@ -115,6 +113,19 @@ class MainGUI(wx.Frame):
             panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
         button.Bind(wx.EVT_BUTTON, self.SaveOpen)
+        layer_depth += layer_diff
+
+        # Separator of output file
+        wx.StaticText(
+            panel, label=u''.join([
+                u'Separator of the output file:'
+            ]), pos=(first_blk, layer_depth+2)
+        )
+        # do not use unicode here
+        self.output_sep = wx.ComboBox(
+            panel, value=';', choices=[';', ','],
+            pos=(sec_blk, layer_depth), size=(50, 20)
+        )
         layer_depth += layer_diff
 
         # Inputs to the format time string
@@ -289,19 +300,6 @@ class MainGUI(wx.Frame):
                 u'Use the minimum value in the trend',
                 u'Use the first value in the trend'
             ], pos=(sec_blk, layer_depth), size=(200, 20)
-        )
-        layer_depth += layer_diff
-
-        # Separator of output file
-        wx.StaticText(
-            panel, label=u''.join([
-                u'Separator of the output file:'
-            ]), pos=(first_blk, layer_depth+2)
-        )
-        # do not use unicode here
-        self.output_sep = wx.ComboBox(
-            panel, value=';', choices=[';', ','],
-            pos=(sec_blk, layer_depth), size=(50, 20)
         )
         layer_depth += layer_diff
 
