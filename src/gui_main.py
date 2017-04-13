@@ -251,9 +251,17 @@ class MainGUI(wx.Frame):
         # add fixed interval input
         layer_depth += (layer_diff+20)
         text = wx.StaticText(
-            panel, label=u'New time interval:', pos=(first_blk, layer_depth)
+            panel, label=u'New time interval:',
+            pos=(first_blk, layer_depth)
         )
-
+        self.time_int = wx.SpinCtrl(
+            panel, value='10', min=1, max=31*24*60,  # max: approx. 1 month
+            pos=(sec_blk, layer_depth), size=(50, 20)
+        )
+        text = wx.StaticText(
+            panel, label=u'minutes',
+            pos=(sec_blk+50+10, layer_depth+2)
+        )
 
         # buttons at the bottom
         # button_ok = wx.Button(panel, label=u'Analysis')
