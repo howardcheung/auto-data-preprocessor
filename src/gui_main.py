@@ -10,7 +10,8 @@
 # import python internal modules
 from calendar import monthrange
 from datetime import datetime
-from os.path import isfile
+from os.path import isfile, dirname
+from pathlib import Path
 from webbrowser import open as webbrowseropen
 
 # import third party modules
@@ -289,6 +290,7 @@ class MainGUI(wx.Frame):
                 u'Step Function', u'Continuous variable (coming soon)'
             ], pos=(sec_blk, layer_depth), size=(200, 20)
         )
+        self.func_choice.SetEditable(False)
         layer_depth += layer_diff
 
         # Assumptions on extrapolation
@@ -305,6 +307,7 @@ class MainGUI(wx.Frame):
                 u'Use the first value in the trend'
             ], pos=(sec_blk, layer_depth), size=(200, 20)
         )
+        self.early_pts.SetEditable(False)
         layer_depth += layer_diff
 
         # buttons at the bottom
@@ -480,12 +483,37 @@ class MainGUI(wx.Frame):
             Function to initiate the main analysis.
         """
         # check all required inputs
+        # check the existence of the folder
         if not isfile(self.dfpath.GetValue()):
             wx.MessageBox(
                 u'Cannot open the data file!', u'Status',
                 wx.OK | wx.ICON_INFORMATION
             )
             return
+        # check the existence of the saving path
+        if not Path(dirname(self.newdfpath.GetValue())).exists():
+            wx.MessageBox(
+                u'Saving directory does not exist!', u'Status',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            return
+        # check the time
+        start_time = datetime(
+            int(self.start_year), int(self.start_mon), int(self.start_day),
+            int(self.start_hr), int(self.start_min)
+        )
+        end_time = datetime(
+            int(self.end_year), int(self.end_mon), int(self.end_day),
+            int(self.end_hr), int(self.end_min)
+        )
+        if start_time > end_time:
+            wx.MessageBox(
+                u'Starting time later than ending time!', u'Status',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            return
+        
+            
 
         # Run the analyzer
 
