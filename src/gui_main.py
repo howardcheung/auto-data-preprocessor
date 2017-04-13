@@ -266,7 +266,7 @@ class MainGUI(wx.Frame):
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
         self.no_endtime = wx.CheckBox(panel, pos=(sec_blk+70*5, layer_depth+2))
-        self.no_endtime.SetValue(False)
+        self.no_endtime.SetValue(True)
         wx.StaticText(
             panel, label=u'Autogen\nending time',
             pos=(sec_blk+70*5, layer_depth+20)
@@ -481,7 +481,7 @@ class MainGUI(wx.Frame):
             int(self.end_day.GetValue()), int(self.end_hr.GetValue()),
             int(self.end_min.GetValue())
         )
-        if start_time > end_time:
+        if not self.no_endtime.GetValue() and start_time > end_time:
             wx.MessageBox(
                 u'Starting time later than ending time!', u'Error',
                 wx.OK | wx.ICON_INFORMATION
@@ -497,7 +497,8 @@ class MainGUI(wx.Frame):
                 time_format=self.timestring.GetValue()
             )
             convert_df(
-               datadf, start_time, end_time,
+               datadf, start_time,
+               (None if self.no_endtime.GetValue() else end_time),
                interval=int(self.time_int.GetValue())*60,
                step=(True if self.func_choice.GetSelection()==0 else False),
                ini_val=self.early_pts.GetSelection()+1,
