@@ -8,8 +8,10 @@
 """
 
 # import python internal modules
-from webbrowser import open as webbrowseropen
+from calendar import monthrange
+from datetime import datetime
 from os.path import isfile
+from webbrowser import open as webbrowseropen
 
 # import third party modules
 import wx
@@ -145,11 +147,13 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
         ]), pos=(sec_blk, begin_depth+layer_diff*5+40))
+        self.start_yr.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
         self.start_mon = wx.ComboBox(
             panel, pos=(sec_blk+70, begin_depth+layer_diff*5+20),
             choices=[str(ind) for ind in range(1, 13)], size=(50, 20)
         )
         self.start_mon.SetValue('1')
+        self.start_mon.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
         ]), pos=(sec_blk+70, begin_depth+layer_diff*5+40))
@@ -245,6 +249,26 @@ class MainGUI(wx.Frame):
                 u'#strftime-and-strptime-behavior'
             ])
         )
+
+    def ChangeStartDayLimit(self, evt):
+        """
+            Function to change the limit of the starting day selection
+            based on the selection of the year and the month
+        """
+        # find the number of days based on the current configuration
+        lastday = monthrange(
+            int(self.start_yr.GetValue()), int(self.start_mon.GetValue())
+        )[1]
+        # check the current selection. Set it to the last day of the month
+        # if the current selection exceed the new last day
+        if int(self.start_day.GetValue()) > lastday:
+            self.start_day.SetValue(str(lastday))
+        # add days to fit monthrange
+        while self.start_day.GetCount() < lastday:
+            self.start_day.Append(str(self.start_day.GetCount()+1))
+        # remove days to fit monthrange
+        while self.start_day.GetCount() > lastday:
+            self.start_day.Delete(self.start_day.GetCount()-1)
 
     def Analyzer(self, evt):
         """
