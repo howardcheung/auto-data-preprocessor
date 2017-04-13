@@ -38,7 +38,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(625, 400)
+            parent, title=title, size=(625, 500)
         )  # size of the application window
 
         self.initui()
@@ -65,7 +65,7 @@ class MainGUI(wx.Frame):
         # title
         # leave space at the top, left and bottom from the text to the
         # other object
-        
+
         # position: (from top to bottom, from left to right)
         wx.StaticText(panel, label=u''.join([
             u'Time-of-change value data to data',
@@ -100,7 +100,7 @@ class MainGUI(wx.Frame):
         self.header.SetValue(True)
 
         # Inputs to the directory to save the plots
-        layer_depth = begin_depth+layer_diff*3
+        layer_depth += layer_diff
         text = wx.StaticText(
             panel, label=u'Path to save file:', pos=(first_blk, layer_depth)
         )
@@ -117,7 +117,7 @@ class MainGUI(wx.Frame):
         button.Bind(wx.EVT_BUTTON, self.SaveOpen)
 
         # Inputs to the format time string
-        layer_depth = begin_depth+layer_diff*4
+        layer_depth += layer_diff
         text = wx.StaticText(panel, label=u''.join([
             u'Format of time string \nin the first column:'
         ]), pos=(first_blk, layer_depth))
@@ -137,7 +137,7 @@ class MainGUI(wx.Frame):
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
 
         # add start time input
-        layer_depth = begin_depth+layer_diff*5+20
+        layer_depth += (layer_diff+20)
         text = wx.StaticText(panel, label=u''.join([
             u'Start time in the new data file:'
             u'\n(inaccurate for too much extension)'
@@ -193,7 +193,7 @@ class MainGUI(wx.Frame):
         ]), pos=(sec_blk+70*4, layer_depth+20))
 
         # add ending time input
-        layer_depth = begin_depth+layer_diff*6+40
+        layer_depth += (layer_diff+20)
         text = wx.StaticText(panel, label=u''.join([
             u'Ending time in the new data file:',
             u'\n(inaccurate for too much extension)'
@@ -247,7 +247,13 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
-        
+
+        # add fixed interval input
+        layer_depth += (layer_diff+20)
+        text = wx.StaticText(
+            panel, label=u'New time interval:', pos=(first_blk, layer_depth)
+        )
+
 
         # buttons at the bottom
         # button_ok = wx.Button(panel, label=u'Analysis')
