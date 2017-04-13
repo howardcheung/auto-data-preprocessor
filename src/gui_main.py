@@ -78,29 +78,30 @@ class MainGUI(wx.Frame):
             panel, label=u'Data file path:',
             pos=(first_blk, layer_depth+2)
         )
+        layer_depth += layer_diff
 
         # require additional object for textbox
         # with default path
         self.dfpath = wx.TextCtrl(
             panel, value=u'../dat/time_of_change.csv',
-            pos=(sec_blk, begin_depth+layer_diff), size=(250, 20)
+            pos=(sec_blk, layer_depth), size=(250, 20)
         )
         button = wx.Button(
             panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
         button.Bind(wx.EVT_BUTTON, self.OnOpen)
+        layer_depth += layer_diff
 
         # ask for existence of header as a checkbox
-        layer_depth = begin_depth+layer_diff*2
         text = wx.StaticText(
             panel, label=u'Existence of a header row:',
             pos=(first_blk, layer_depth+2)
         )
         self.header = wx.CheckBox(panel, pos=(sec_blk, layer_depth))
         self.header.SetValue(True)
+        layer_depth += layer_diff
 
         # Inputs to the directory to save the plots
-        layer_depth += layer_diff
         text = wx.StaticText(
             panel, label=u'Path to save file:', pos=(first_blk, layer_depth+2)
         )
@@ -114,9 +115,9 @@ class MainGUI(wx.Frame):
             panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
         button.Bind(wx.EVT_BUTTON, self.SaveOpen)
+        layer_depth += layer_diff
 
         # Inputs to the format time string
-        layer_depth += layer_diff
         text = wx.StaticText(panel, label=u''.join([
             u'Format of time string \nin the first column:'
         ]), pos=(first_blk, layer_depth+2))
@@ -133,9 +134,9 @@ class MainGUI(wx.Frame):
             pos=(sec_blk, layer_depth+20)
         )
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
+        layer_depth += (layer_diff+20)
 
         # add start time input
-        layer_depth += (layer_diff+20)
         text = wx.StaticText(panel, label=u''.join([
             u'Start time in the new data file:'
             u'\n(inaccurate for too much extension)'
@@ -189,9 +190,9 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
+        layer_depth += (layer_diff+20)
 
         # add ending time input
-        layer_depth += (layer_diff+20)
         text = wx.StaticText(panel, label=u''.join([
             u'Ending time in the new data file:',
             u'\n(inaccurate for too much extension)'
@@ -260,9 +261,9 @@ class MainGUI(wx.Frame):
             panel, label=u'minutes',
             pos=(sec_blk+50+10, layer_depth+2)
         )
+        layer_depth += layer_diff
 
         # Relationship between time series data points
-        layer_depth += layer_diff
         wx.StaticText(
             panel, label=u'Assumption between data points:',
             pos=(first_blk, layer_depth+2)
@@ -273,9 +274,9 @@ class MainGUI(wx.Frame):
                 u'Step Function', u'Continuous variable (coming soon)'
             ], pos=(sec_blk, layer_depth), size=(200, 20)
         )
+        layer_depth += layer_diff
 
         # Assumptions on extrapolation
-        layer_depth += layer_diff
         wx.StaticText(
             panel, label=u''.join([
                 u'Assumptions for data points\n',
@@ -289,9 +290,9 @@ class MainGUI(wx.Frame):
                 u'Use the first value in the trend'
             ], pos=(sec_blk, layer_depth), size=(200, 20)
         )
+        layer_depth += layer_diff
 
         # Separator of output file
-        layer_depth += layer_diff
         wx.StaticText(
             panel, label=u''.join([
                 u'Separator of the output file:'
@@ -302,6 +303,7 @@ class MainGUI(wx.Frame):
             panel, value=';', choices=[';', ','],
             pos=(sec_blk, layer_depth), size=(50, 20)
         )
+        layer_depth += layer_diff
 
         # buttons at the bottom
         # button_ok = wx.Button(panel, label=u'Analysis')
