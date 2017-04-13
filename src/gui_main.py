@@ -147,16 +147,20 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
         ]), pos=(sec_blk, begin_depth+layer_diff*5+40))
+        # reset the last day of the month if needed
         self.start_yr.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
+
         self.start_mon = wx.ComboBox(
             panel, pos=(sec_blk+70, begin_depth+layer_diff*5+20),
             choices=[str(ind) for ind in range(1, 13)], size=(50, 20)
         )
         self.start_mon.SetValue('1')
+        # reset the last day of the month if needed
         self.start_mon.Bind(wx.EVT_COMBOBOX, self.ChangeStartDayLimit)
         text = wx.StaticText(panel, label=u''.join([
             u'Month'
         ]), pos=(sec_blk+70, begin_depth+layer_diff*5+40))
+
         self.start_day = wx.ComboBox(
             panel, pos=(sec_blk+70*2, begin_depth+layer_diff*5+20),
             choices=[str(ind) for ind in range(1, 32)], size=(50, 20)
@@ -165,6 +169,24 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Day'
         ]), pos=(sec_blk+70*2, begin_depth+layer_diff*5+40))
+
+        self.start_hr = wx.ComboBox(
+            panel, pos=(sec_blk+70*3, begin_depth+layer_diff*5+20),
+            choices=['%02i' % ind for ind in range(24)], size=(50, 20)
+        )
+        self.start_hr.SetValue('00')
+        text = wx.StaticText(panel, label=u''.join([
+            u'Hour'
+        ]), pos=(sec_blk+70*3, begin_depth+layer_diff*5+40))
+
+        self.start_min = wx.ComboBox(
+            panel, pos=(sec_blk+70*4, begin_depth+layer_diff*5+20),
+            choices=['%02i' % ind for ind in range(60)], size=(50, 20)
+        )
+        self.start_min.SetValue('00')
+        text = wx.StaticText(panel, label=u''.join([
+            u'Minutes'
+        ]), pos=(sec_blk+70*4, begin_depth+layer_diff*5+40))
         
 
         # buttons at the bottom
