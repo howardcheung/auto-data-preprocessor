@@ -265,9 +265,15 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
+        self.no_endtime = wx.CheckBox(panel, pos=(sec_blk+70*5, layer_depth+2))
+        self.no_endtime.SetValue(False)
+        wx.StaticText(
+            panel, label=u'Autogen\nending time',
+            pos=(sec_blk+70*5, layer_depth+20)
+        )
+        layer_depth += (layer_diff+20)
 
         # add fixed interval input
-        layer_depth += (layer_diff+20)
         text = wx.StaticText(
             panel, label=u'New time interval:',
             pos=(first_blk, layer_depth+2)
