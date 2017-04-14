@@ -296,8 +296,9 @@ class MainGUI(wx.Frame):
         self.func_choice = wx.ComboBox(
             panel, value=u'Step Function',
             choices=[
-                u'Step Function', u'Continuous variable (coming soon)'
-            ], pos=(sec_blk, layer_depth), size=(200, 20)
+                u'Step Function',
+                u'Continuous variable (inter- and extrapolation)'
+            ], pos=(sec_blk, layer_depth), size=(225, 20)
         )
         self.func_choice.SetSelection(0)
         self.func_choice.SetEditable(False)
@@ -315,7 +316,7 @@ class MainGUI(wx.Frame):
             choices=[
                 u'Use the minimum value in the trend',
                 u'Use the first value in the trend'
-            ], pos=(sec_blk, layer_depth), size=(200, 20)
+            ], pos=(sec_blk, layer_depth), size=(225, 20)
         )
         self.early_pts.SetSelection(0)
         self.early_pts.SetEditable(False)
@@ -382,9 +383,9 @@ class MainGUI(wx.Frame):
         openFileDialog = wx.FileDialog(
             self, 'Open file', '', '',
             ''.join([
-                'csv files (*.csv)|*.csv'
-                # 'xls files (*.xls)|*.xls;|',  # to be done
-                # 'xlsx files (*.xlsx)|*.xlsx'  # to be done
+                'csv files (*.csv)|*.csv;|',
+                'xls files (*.xls)|*.xls;|',
+                'xlsx files (*.xlsx)|*.xlsx'
             ]), wx.FD_SAVE
         )
 
