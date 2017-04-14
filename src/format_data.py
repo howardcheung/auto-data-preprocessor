@@ -9,6 +9,7 @@
 """
 
 # import python internal libraries
+from copy import deepcopy
 from datetime import datetime, timedelta
 from math import isnan
 from os import mkdir
@@ -83,22 +84,24 @@ def convert_df(datadf: DataFrame, start_time: datetime,
         start_time+timedelta(seconds=interval*ind) for ind in range(num)
     ], columns=datadf.columns)
 
-    if step:
-        # calculate the starting values for the new dataframe
-        # if the starting value is not given, assume that the initial value
-        # is the smallest for all possible values
-        for col in final_df.columns:
-            # find the appearance of the first value
-            for oldind in datadf.index:
-                if not isnan(datadf.loc[oldind, col]):
-                    pos = oldind
-                    break
-            if final_df.index[0] >= pos or ini_val == 2:
-                final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
-            else:
-                final_df.loc[final_df.index[0], col] = \
-                    datadf[col].dropna().unique().min()
+    # calculate the starting values for the new dataframe
+    # if the starting value is not given, assume that the initial value
+    # is the smallest for all possible values
+    ini_val_pos = []  # locations of the good initial values
+    for col in final_df.columns:
+        # find the appearance of the first value
+        for ind_oldind, oldind in enumerate(datadf.index):
+            if not isnan(datadf.loc[oldind, col]):
+                pos = oldind
+                ini_val_pos.append(ind_oldind)
+                break
+        if final_df.index[0] >= pos or ini_val == 2:
+            final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
+        else:
+            final_df.loc[final_df.index[0], col] = \
+                datadf[col].dropna().unique().min()
 
+    if step:  # assume step function
         # continue to append new columns until the end
         oldind = 0
         newind = 1
@@ -119,21 +122,56 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 if oldind < oldlen-1:
                     oldind += 1
             newind += 1
+    else:  # run interpolation        
+        # continue to append new columns until the end
+        newlen = final_df.shape[0]
+        for col, ini in zip(final_df.columns, ini_val_pos):
+            newind = 1
+            # to fit the initial value assumption
+            try:
+                while final_df.index[newind] < datadf.index[ini]:
+                    final_df.loc[final_df.index[newind], col] = \
+                        final_df.loc[final_df.index[newind-1], col]
+                    newind += 1
+            except IndexError:  # all initial values
+                continue  # next loop
+            oldind = ini+1
+            while newind < newlen:
+                # find the next available value in the old dataframe
+                oldoldind = oldind
+                oldind += 1
+                try:
+                    while isinstance(
+                            datadf.loc[datadf.index[oldind], col], str
+                        ) or isnan(datadf.loc[datadf.index[oldind], col]):
+                        oldind += 1
+                except IndexError:  # out of frame. Use the old value
+                    oldind = oldoldind
+                # for both interpolation and extrapolation at the end
+                while newind < newlen and (
+                            oldind == oldoldind or
+                            final_df.index[newind] < datadf.index[oldind]
+                        ):
+                    final_df.loc[final_df.index[newind], col] = \
+                        interpolate_with_s(
+                            final_df.index[newind], final_df.index[newind-1],
+                            datadf.index[oldind],
+                            final_df.loc[final_df.index[newind-1], col],
+                            datadf.loc[datadf.index[oldind], col]
+                        )
+                    if final_df.loc[final_df.index[newind], col] > 1.0:
+                        import pdb; pdb.set_trace()
+                    newind += 1
 
-        # output new file
-        if output_csv is not None:
-            mkdir_if_not_exist(dirname(output_csv))
-            final_df.to_csv(output_csv, sep=sep)
-    else:
-        raise ValueError(u''.join([
-            u'The interpolation function of format_data.convert_df is',
-            u' incomplete. Should not be used for now.'
-        ]))
+    # output new file
+    if output_csv is not None:
+        mkdir_if_not_exist(dirname(output_csv))
+        final_df.to_csv(output_csv, sep=sep)
 
     return final_df
 
 
-def mkdir_if_not_exist(usrpath):
+def mkdir_if_not_exist(usrpath: str):
     """
         Make a directory at usrpath if the directory does not exist
 
@@ -147,6 +185,33 @@ def mkdir_if_not_exist(usrpath):
         mkdir(usrpath)
 
 
+def interpolate_with_s(mid_date: datetime, a_date: datetime, b_date: datetime,
+                       a: float, b: float) -> float:
+    """
+        Interpolate with datetime.datetime objects bewteen values a and b on
+        two different dates based on their difference in seconds
+
+        Inputs:
+        ==========
+        mid_date: datetime.datetime
+            the date where the value is needed
+        a_date: datetime.datetime
+            the date where value a is
+        b_date: datetime.datetime
+            the date where value b is
+        a: float
+            value a
+        b: float
+            value b
+    """
+
+    result = (b-a)*(mid_date-a_date).total_seconds() /\
+        (b_date-a_date).total_seconds()+a  # use total seconds for large diff
+    if isnan(result):
+        return 0.0
+    else:
+        return result
+
 # testing functions
 if __name__ == '__main__':
 
@@ -157,36 +222,50 @@ if __name__ == '__main__':
     # check function for computer-generated ending time
     FILENAME = '../dat/time_of_change.csv'
     TEST_DF = read_data(FILENAME, header=0)
-    NEW_DF = convert_df(TEST_DF, datetime(2011, 1, 1, 0, 0))
+    NEW_DF = convert_df(TEST_DF, datetime(2017, 1, 1, 0, 0))
     assert isinstance(NEW_DF, DataFrame)
     assert NEW_DF.index[-1] <= TEST_DF.index[-1]
     assert NEW_DF.index[-1] >= TEST_DF.index[-2]
 
     # check function for new ending time
     NEW_DF = convert_df(
-        TEST_DF, datetime(2011, 1, 1, 0, 0), datetime(2011, 1, 3, 11, 50),
+        TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 3, 11, 50),
         output_csv='../testresult.csv'
     )
     assert Path('../testresult.csv').exists()
     remove('../testresult.csv')
-    assert NEW_DF.index[-1] == datetime(2011, 1, 3, 11, 50)
+    assert NEW_DF.index[-1] == datetime(2017, 1, 3, 11, 50)
     assert NEW_DF.loc[NEW_DF.index[0], 'Item 4'] == 0.0
     assert NEW_DF.loc[NEW_DF.index[0], 'Item 3'] == 0.0
     # check function of the correction
-    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 1'] == 0.0
-    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 2'] == 1.0
-    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 3'] == 0.0
-    assert NEW_DF.loc[datetime(2011, 1, 3, 10, 50), 'Item 4'] == 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 10, 50), 'Item 1'] == 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 10, 50), 'Item 2'] == 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 10, 50), 'Item 3'] == 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 10, 50), 'Item 4'] == 0.0
 
-    # check function with new initial values    
+    # check function with new initial values
     NEW_DF = convert_df(
-        TEST_DF, datetime(2011, 1, 1, 0, 0), datetime(2011, 1, 3, 11, 50),
+        TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 3, 11, 50),
         ini_val=2
     )
     # check function of the correction
-    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 1'] == 1.0
-    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 2'] == 1.0
-    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 3'] == 1.0
-    assert NEW_DF.loc[datetime(2011, 1, 1, 0, 0), 'Item 4'] == 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 1, 0, 0), 'Item 1'] == 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 1, 0, 0), 'Item 2'] == 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 1, 0, 0), 'Item 3'] == 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 1, 0, 0), 'Item 4'] == 0.0
+
+    # check function of the interpolation
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 3, 11, 50),
+        ini_val=2, step=False
+    )
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 1'] <= 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 2'] <= 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 3'] <= 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 4'] <= 1.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 1'] > 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 2'] > 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 3'] > 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 4'] > 0.0
     
     print('All functions in', basename(__file__), 'are ok')
