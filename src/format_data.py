@@ -174,7 +174,7 @@ def convert_df(datadf: DataFrame, start_time: datetime,
         elif output_file.split('.')[-1] == 'xlsx':
             # need to open and close files if engine is not 'xlsxWriter'
             with ExcelWriter(
-                    output_file, engine = 'openpyxl',
+                    output_file, engine='xlsxwriter',
                     datetime_format=output_timestring
                 ) as writer:
                 final_df.to_excel(writer)
