@@ -1,0 +1,1 @@
+pyinstaller ../src/gui_main.py
