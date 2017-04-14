@@ -25,7 +25,8 @@ from pandas import DataFrame, ExcelWriter
 def convert_df(datadf: DataFrame, start_time: datetime,
                end_time: datetime=None, interval: float=600,
                step: bool=True, ini_val: int=1,
-               output_file: str=None, sep: str=';') -> DataFrame:
+               output_file: str=None, sep: str=';',
+               output_timestring: str='%Y/%m/%d %H:%M:%S') -> DataFrame:
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
@@ -66,6 +67,9 @@ def convert_df(datadf: DataFrame, start_time: datetime,
 
         sep: str
             separator in the csv. Default ';'
+
+        output_timestring: str
+            format time string in the output file. Default '%Y-%m-%d %H:%M:%S'
     """
 
     # calculate the ending index for the new dataframe
@@ -164,14 +168,22 @@ def convert_df(datadf: DataFrame, start_time: datetime,
     if output_file is not None:
         mkdir_if_not_exist(dirname(output_file))
         if output_file.split('.')[-1] == 'csv':
-            final_df.to_csv(output_file, sep=sep)
+            final_df.to_csv(
+                output_file, sep=sep, date_format=output_timestring
+            )
         elif output_file.split('.')[-1] == 'xlsx':
             # need to open and close files if engine is not 'xlsxWriter'
-            with ExcelWriter(output_file, engine = 'openpyxl') as writer:
+            with ExcelWriter(
+                    output_file, engine = 'openpyxl',
+                    datetime_format=output_timestring
+                ) as writer:
                 final_df.to_excel(writer)
                 writer.save()
         elif output_file.split('.')[-1] == 'xls':
-            with ExcelWriter(output_file, engine = 'xlwt') as writer:
+            with ExcelWriter(
+                    output_file, engine = 'xlwt',
+                    datetime_format=output_timestring
+                ) as writer:
                 final_df.to_excel(writer)
                 writer.save()
         else:
@@ -232,6 +244,8 @@ if __name__ == '__main__':
     from os import remove
     from data_read import read_data
 
+    from pandas import read_csv, read_excel, Timestamp
+
     # check function for computer-generated ending time
     FILENAME = '../dat/time_of_change.csv'
     TEST_DF = read_data(FILENAME, header=0)
@@ -243,10 +257,10 @@ if __name__ == '__main__':
     # check function for new ending time
     NEW_DF = convert_df(
         TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 3, 11, 50),
-        output_file='../testresult.csv'
+        output_file='./testresult.csv'
     )
-    assert Path('../testresult.csv').exists()
-    remove('../testresult.csv')
+    assert Path('./testresult.csv').exists()
+    remove('./testresult.csv')
     assert NEW_DF.index[-1] == datetime(2017, 1, 3, 11, 50)
     assert NEW_DF.loc[NEW_DF.index[0], 'Item 4'] == 0.0
     assert NEW_DF.loc[NEW_DF.index[0], 'Item 3'] == 0.0
@@ -294,5 +308,23 @@ if __name__ == '__main__':
     )
     assert Path('./testresult.xlsx').exists()
     remove('./testresult.xlsx')
+
+    # check time string
+    for filename in [
+        './testresult.csv', './testresult.xlsx', './testresult.xls'
+    ]:
+        NEW_DF = convert_df(
+            TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 1, 11, 50),
+            ini_val=2, output_file=filename
+        )
+        if 'csv' in filename:
+            NEW_DF = read_csv(
+                filename, sep=';', index_col=0, parse_dates=True,
+                infer_datetime_format='%Y/%m/%d %H:%M:%S'
+            )
+        else:
+            NEW_DF = read_excel(filename)
+        assert isinstance(NEW_DF.index[0], Timestamp)
+        remove(filename)
 
     print('All functions in', basename(__file__), 'are ok')
