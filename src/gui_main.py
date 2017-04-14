@@ -42,7 +42,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(625, 600)
+            parent, title=title, size=(625, 650)
         )  # size of the application window
 
         self.initui()
@@ -118,7 +118,8 @@ class MainGUI(wx.Frame):
         # can be any string, but provide the choices
         wx.StaticText(
             panel, label=u''.join([
-                u'Separator of the output file:'
+                u'Separator of the output file',
+                u'\n(valid for csv file only):'
             ]), pos=(first_blk, layer_depth+2)
         )
         # do not use unicode here
@@ -130,12 +131,11 @@ class MainGUI(wx.Frame):
 
         # Inputs to the format time string
         text = wx.StaticText(panel, label=u''.join([
-            u'Format of time string \nin the first column:'
+            u'Format of time string \nin the output file:'
         ]), pos=(first_blk, layer_depth+2))
-
         # # require additional object for textbox
-        self.timestring = wx.TextCtrl(
-            panel, value=u'%m/%d/%y %I:%M:%S %p CST',
+        self.outputtimestring = wx.TextCtrl(
+            panel, value=u'%Y/%m/%d %H:%M:%S',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
         # a button for instructions
@@ -145,6 +145,21 @@ class MainGUI(wx.Frame):
             pos=(sec_blk, layer_depth+20)
         )
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
+        layer_depth += (layer_diff+20)
+
+        # Inputs to the format time string
+        text = wx.StaticText(panel, label=u''.join([
+            u'Format of time string \nin the first column\n of the input file:'
+        ]), pos=(first_blk, layer_depth+2))
+        # require additional object for textbox
+        self.timestring = wx.TextCtrl(
+            panel, value=u'%m/%d/%y %I:%M:%S %p CST',
+            pos=(sec_blk, layer_depth), size=(250, 20)
+        )
+        # a button for instructions
+        text = wx.StaticText(panel, label=u''.join([
+            u'Same instructions as the format in output file'
+        ]), pos=(sec_blk, layer_depth+20))
         layer_depth += (layer_diff+20)
 
         # add start time input
@@ -504,7 +519,8 @@ class MainGUI(wx.Frame):
                step=(True if self.func_choice.GetSelection()==0 else False),
                ini_val=self.early_pts.GetSelection()+1,
                output_file=self.newdfpath.GetValue(),
-               sep=self.output_sep.GetValue()
+               sep=self.output_sep.GetValue(),
+               output_timestring=self.outputtimestring.GetValue()
             )
         except BaseException:
             box = wx.MessageDialog(
