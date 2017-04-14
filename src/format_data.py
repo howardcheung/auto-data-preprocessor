@@ -9,7 +9,6 @@
 """
 
 # import python internal libraries
-from copy import deepcopy
 from datetime import datetime, timedelta
 from math import isnan
 from os import mkdir
@@ -17,7 +16,7 @@ from os.path import dirname
 from pathlib import Path
 
 # import third party libraries
-from pandas import DataFrame
+from pandas import DataFrame, ExcelWriter
 
 # import user-defined libraries
 
@@ -26,7 +25,7 @@ from pandas import DataFrame
 def convert_df(datadf: DataFrame, start_time: datetime,
                end_time: datetime=None, interval: float=600,
                step: bool=True, ini_val: int=1,
-               output_csv: str=None, sep: str=';') -> DataFrame:
+               output_file: str=None, sep: str=';') -> DataFrame:
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
@@ -61,9 +60,9 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 2: Use the first value in the trend
             Default 1
 
-        output_csv: str
-            the path where the dataframe should be output as a csv.
-            Default None: no output
+        output_file: str
+            the path where the dataframe should be output as a csv, xls
+            or xlsx depending on the extension. Default None: no output
 
         sep: str
             separator in the csv. Default ';'
@@ -122,7 +121,7 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 if oldind < oldlen-1:
                     oldind += 1
             newind += 1
-    else:  # run interpolation        
+    else:  # run interpolation
         # continue to append new columns until the end
         newlen = final_df.shape[0]
         for col, ini in zip(final_df.columns, ini_val_pos):
@@ -149,9 +148,9 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                     oldind = oldoldind
                 # for both interpolation and extrapolation at the end
                 while newind < newlen and (
-                            oldind == oldoldind or
-                            final_df.index[newind] < datadf.index[oldind]
-                        ):
+                        oldind == oldoldind or
+                        final_df.index[newind] < datadf.index[oldind]
+                    ):
                     final_df.loc[final_df.index[newind], col] = \
                         interpolate_with_s(
                             final_df.index[newind], final_df.index[newind-1],
@@ -159,14 +158,24 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                             final_df.loc[final_df.index[newind-1], col],
                             datadf.loc[datadf.index[oldind], col]
                         )
-                    if final_df.loc[final_df.index[newind], col] > 1.0:
-                        import pdb; pdb.set_trace()
                     newind += 1
 
     # output new file
-    if output_csv is not None:
-        mkdir_if_not_exist(dirname(output_csv))
-        final_df.to_csv(output_csv, sep=sep)
+    if output_file is not None:
+        mkdir_if_not_exist(dirname(output_file))
+        if output_file.split('.')[-1] == 'csv':
+            final_df.to_csv(output_file, sep=sep)
+        elif output_file.split('.')[-1] == 'xlsx':
+            # need to open and close files if engine is not 'xlsxWriter'
+            with ExcelWriter(output_file, engine = 'openpyxl') as writer:
+                final_df.to_excel(writer)
+                writer.save()
+        elif output_file.split('.')[-1] == 'xls':
+            with ExcelWriter(output_file, engine = 'xlwt') as writer:
+                final_df.to_excel(writer)
+                writer.save()
+        else:
+            raise ValueError('Wrong extension for output file')
 
     return final_df
 
@@ -186,7 +195,7 @@ def mkdir_if_not_exist(usrpath: str):
 
 
 def interpolate_with_s(mid_date: datetime, a_date: datetime, b_date: datetime,
-                       a: float, b: float) -> float:
+                       aval: float, bval: float) -> float:
     """
         Interpolate with datetime.datetime objects bewteen values a and b on
         two different dates based on their difference in seconds
@@ -195,18 +204,22 @@ def interpolate_with_s(mid_date: datetime, a_date: datetime, b_date: datetime,
         ==========
         mid_date: datetime.datetime
             the date where the value is needed
+
         a_date: datetime.datetime
             the date where value a is
+
         b_date: datetime.datetime
             the date where value b is
-        a: float
+
+        aval: float
             value a
-        b: float
+
+        bval: float
             value b
     """
-
-    result = (b-a)*(mid_date-a_date).total_seconds() /\
-        (b_date-a_date).total_seconds()+a  # use total seconds for large diff
+    # use total seconds for large diff
+    result = (bval-aval)*(mid_date-a_date).total_seconds() /\
+        (b_date-a_date).total_seconds()+aval
     if isnan(result):
         return 0.0
     else:
@@ -230,7 +243,7 @@ if __name__ == '__main__':
     # check function for new ending time
     NEW_DF = convert_df(
         TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 3, 11, 50),
-        output_csv='../testresult.csv'
+        output_file='../testresult.csv'
     )
     assert Path('../testresult.csv').exists()
     remove('../testresult.csv')
@@ -267,5 +280,19 @@ if __name__ == '__main__':
     assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 2'] > 0.0
     assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 3'] > 0.0
     assert NEW_DF.loc[datetime(2017, 1, 3, 11, 50), 'Item 4'] > 0.0
-    
+
+    # check output file
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 3, 11, 50),
+        ini_val=2, output_file='./testresult.xls'
+    )
+    assert Path('./testresult.xls').exists()
+    remove('./testresult.xls')
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2017, 1, 1, 0, 0), datetime(2017, 1, 3, 11, 50),
+        ini_val=2, output_file='./testresult.xlsx'
+    )
+    assert Path('./testresult.xlsx').exists()
+    remove('./testresult.xlsx')
+
     print('All functions in', basename(__file__), 'are ok')

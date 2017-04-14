@@ -502,7 +502,7 @@ class MainGUI(wx.Frame):
                interval=int(self.time_int.GetValue())*60,
                step=(True if self.func_choice.GetSelection()==0 else False),
                ini_val=self.early_pts.GetSelection()+1,
-               output_csv=self.newdfpath.GetValue(),
+               output_file=self.newdfpath.GetValue(),
                sep=self.output_sep.GetValue()
             )
         except BaseException:
