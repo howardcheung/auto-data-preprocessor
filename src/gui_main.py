@@ -17,6 +17,7 @@ from webbrowser import open as webbrowseropen
 
 # import third party modules
 import wx
+from wx import adv
 
 # import user-defined modules
 from data_read import read_data
@@ -24,6 +25,16 @@ from format_data import convert_df
 
 
 # define global variables
+DESCRIPTION = \
+"""Data Preprocessing Helper is a software made to
+help people to preprocess their data that contain ugly
+features such as time-of-change values, blank values, etc
+to nicely presented data with no blank values
+"""
+LICENSE = \
+"""TBD
+"""
+
 class MainGUI(wx.Frame):
     """
         Class to hold the object for the main window of the application
@@ -56,6 +67,15 @@ class MainGUI(wx.Frame):
 
         # define the panel
         panel = wx.Panel(self)
+
+        # create menubar for About information
+        menubar = wx.MenuBar()
+        helpm = wx.Menu()
+        abti = wx.MenuItem(helpm, wx.ID_ABOUT, '&About', 'Program Information')
+        self.Bind(wx.EVT_MENU, self.AboutDialog, abti)
+        helpm.Append(abti)
+        menubar.Append(helpm, '&Help')
+        self.SetMenuBar(menubar)
 
         # define layer size
         begin_depth = 20
@@ -464,6 +484,23 @@ class MainGUI(wx.Frame):
         while self.end_day.GetCount() > lastday:
             self.end_day.Delete(self.end_day.GetCount()-1)
         evt.Skip()
+
+    def AboutDialog(self, evt):
+        """
+            Function to show the dialog box for About Information
+        """
+
+        info = adv.AboutDialogInfo()
+        info.SetName('Data Preprocessing Helper')
+        info.SetVersion('0.1')
+        info.SetDescription(DESCRIPTION)
+        info.SetCopyright('(C) 2017 Howard Cheung')
+        info.SetWebSite(
+            'https://github.com/howardcheung/auto-data-preprocessor'
+        )
+        info.SetLicence(LICENSE)
+        info.AddDeveloper('Howard Cheung [howard.at (at) gmail.com]')
+        adv.AboutBox(info)
 
     def Analyzer(self, evt):
         """
