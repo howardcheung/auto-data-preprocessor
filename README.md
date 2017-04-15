@@ -28,6 +28,7 @@ If you want, you can also assume the values to be interpolated values
 * `dat`: directory that stores testing data
 * `doc`: directory that stores the user manual
 * `src`: directory that stores the source python script files
+* `licenses`: directory that contains licenses of the modules
 
 # Licenses
 
@@ -47,7 +48,7 @@ Please notice that the software is developed based on Python 3.5.1 and the binar
 | packaging (16.8) | [Link](https://github.com/pypa/packaging/blob/master/LICENSE.BSD) |
 | pandas (0.19.2) | [Link](http://pandas.pydata.org/pandas-docs/stable/overview.html#license) |
 | pip (9.0.1) | [Link](https://github.com/pypa/pip/blob/master/LICENSE.txt) |
-| PyInstaller (3.2.1) | [Link](https://github.com/pyinstaller/pyinstaller/blob/develop/doc/license.rst#id3) |
+| PyInstaller (3.2.1) | [Link](https://github.com/pyinstaller/pyinstaller/blob/develop/COPYING.txt) |
 | pyparsing (2.2.0) | [Link](https://sourceforge.net/projects/pyparsing/files/pyparsing/pyparsing-2.2.0/) (in source tarball) |
 | pypiwin32 (219) | [Link](https://github.com/pywin32/pypiwin32/blob/master/LICENSE) |
 | python-dateutil (2.6.0) | [Link](https://github.com/dateutil/dateutil/blob/master/LICENSE) |
@@ -60,3 +61,4 @@ Please notice that the software is developed based on Python 3.5.1 and the binar
 | XlsxWriter (0.9.6) | [Link](https://github.com/jmcnamara/XlsxWriter/blob/master/LICENSE.txt) |
 | xlwt (1.2.0) | [Link](https://github.com/python-excel/xlwt/blob/917a8ad8db35d6e8abb306a2fda2ace648a6ab89/docs/licenses.rst) |
 
+The licenses of these modules are included in the directory LICENSE.
