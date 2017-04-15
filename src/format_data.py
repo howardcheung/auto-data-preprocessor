@@ -327,4 +327,16 @@ if __name__ == '__main__':
         assert isinstance(NEW_DF.index[0], Timestamp)
         remove(filename)
 
+    # test the interpolation abilities
+    FILENAME = '../dat/missing_data.xls'
+    TEST_DF = read_data(FILENAME, header=0)
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2017, 1, 1, 11, 0), datetime(2017, 1, 1, 21, 50),
+        ini_val=2, step=False
+    )
+    assert isinstance(
+        NEW_DF.loc[datetime(2017, 1, 1, 12, 0), 'Pressure'], float
+    )
+    
+
     print('All functions in', basename(__file__), 'are ok')
