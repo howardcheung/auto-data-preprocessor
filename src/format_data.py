@@ -155,13 +155,25 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                         oldind == oldoldind or
                         final_df.index[newind] < datadf.index[oldind]
                     ):
-                    final_df.loc[final_df.index[newind], col] = \
-                        interpolate_with_s(
-                            final_df.index[newind], final_df.index[newind-1],
-                            datadf.index[oldind],
-                            final_df.loc[final_df.index[newind-1], col],
-                            datadf.loc[datadf.index[oldind], col]
-                        )
+                    if oldind == oldoldind:  # extrapolation at the end
+                        final_df.loc[final_df.index[newind], col] = \
+                            interpolate_with_s(
+                                final_df.index[newind],
+                                datadf.index[oldind-1],
+                                datadf.index[oldind],
+                                datadf.loc[datadf.index[oldind-1], col],
+                                datadf.loc[datadf.index[oldind], col]
+                            )
+                    else:
+                        # interpolation
+                        final_df.loc[final_df.index[newind], col] = \
+                            interpolate_with_s(
+                                final_df.index[newind],
+                                final_df.index[newind-1],
+                                datadf.index[oldind],
+                                final_df.loc[final_df.index[newind-1], col],
+                                datadf.loc[datadf.index[oldind], col]
+                            )
                     newind += 1
 
     # output new file
@@ -331,12 +343,12 @@ if __name__ == '__main__':
     FILENAME = '../dat/missing_data.xls'
     TEST_DF = read_data(FILENAME, header=0)
     NEW_DF = convert_df(
-        TEST_DF, datetime(2017, 1, 1, 11, 0), datetime(2017, 1, 1, 21, 50),
+        TEST_DF, datetime(2017, 1, 1, 11, 0), datetime(2017, 1, 1, 22, 00),
         ini_val=2, step=False
     )
     assert isinstance(
         NEW_DF.loc[datetime(2017, 1, 1, 12, 0), 'Pressure'], float
     )
-    
+    assert NEW_DF.loc[datetime(2017, 1, 1, 22, 0), 'Pressure'] != 0.0
 
     print('All functions in', basename(__file__), 'are ok')
