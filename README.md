@@ -34,7 +34,7 @@ If you want, you can also assume the values to be interpolated values
 
 ## License of this software
 
-The source code written in this repository is distributed under the MIT license and is free for personal, academic and commercial use. Details can be found in the file *LICENSE* in this directory.
+The source code written in this repository is distributed under the GNU GPLv3 license and is free for personal, academic and commercial use. Details can be found in the file *LICENSE* in this directory.
 
 ## Notice of third party license agreements
 
