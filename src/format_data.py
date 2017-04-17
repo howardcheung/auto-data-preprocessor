@@ -138,7 +138,7 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                     newind += 1
             except IndexError:  # all initial values
                 continue  # next loop
-            oldind = ini+1
+            oldind = ini
             while newind < newlen:
                 # find the next available value in the old dataframe
                 oldoldind = oldind
@@ -153,7 +153,7 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 # for both interpolation and extrapolation at the end
                 while newind < newlen and (
                         oldind == oldoldind or
-                        final_df.index[newind] < datadf.index[oldind]
+                        final_df.index[newind] <= datadf.index[oldind]
                     ):
                     if oldind == oldoldind:  # extrapolation at the end
                         final_df.loc[final_df.index[newind], col] = \
@@ -350,5 +350,12 @@ if __name__ == '__main__':
         NEW_DF.loc[datetime(2017, 1, 1, 12, 0), 'Pressure'], float
     )
     assert NEW_DF.loc[datetime(2017, 1, 1, 22, 0), 'Pressure'] != 0.0
+    assert NEW_DF.loc[datetime(2017, 1, 1, 11, 10), 'Pressure'] > \
+        8.227828 and NEW_DF.loc[datetime(2017, 1, 1, 11, 10), 'Pressure'] < \
+        8.227829
+    assert NEW_DF.loc[datetime(2017, 1, 1, 12, 0), 'Pressure'] == (
+        TEST_DF.loc[datetime(2017, 1, 1, 11, 50), 'Pressure'] +
+        TEST_DF.loc[datetime(2017, 1, 1, 12, 10), 'Pressure']
+    )/2.0
 
     print('All functions in', basename(__file__), 'are ok')
