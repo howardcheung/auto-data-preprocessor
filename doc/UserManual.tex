@@ -134,10 +134,17 @@ To do so, we open the graphical use interface and choose the followings.
 \item Autogen ending time: checked
 \item New time interval: 10 minutes (same as that of the file)
 \item Assumption between data points: Continuous variable (inter- and extrapolation)
-\item Assumptions for data points earlier than existing data: Any of them is fine. Our starting time is the same as that of the file
+\item Assumptions for data points earlier than existing data: For interpolation, use "Use the first value in the trend"
 \end{itemize}
 
-The output file should have the invalid and missing data points filled while other data points should remain unchanged.
+The output file should have the invalid and missing data points filled while other data points should remain unchanged as shown in Figure \ref{fig:missing_data_result}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{missing_data_result.png}
+\caption{Resultant data file after interpolation}
+\label{fig:missing_data_result}
+\end{figure}
 
 \section{Inquiries}
 
