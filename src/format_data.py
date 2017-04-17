@@ -1,11 +1,11 @@
 #!/usr/bin/python3
-
 """
     This file contains functions that format data to convert time-of-change
     data to data acquired at fixed intervals
 
     Author: Howard Cheung (howard.at@gmail.com)
     Date: 2017/04/11
+    License of the source code: MIT license
 """
 
 # import python internal libraries

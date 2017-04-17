@@ -1,10 +1,11 @@
-﻿#!/usr/bin/python
+﻿#!/usr/bin/python3
 """
     This script file contains methods to define the graphical user interface
     of the tool.
 
-    Author: Howard Cheung
-    email: howard.at@gmail.com
+    Author: Howard Cheung (howard.at@gmail.com)
+    Date: 2017/04/11
+    License of the source code: MIT license
 """
 
 # import python internal modules

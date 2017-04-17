@@ -1,11 +1,11 @@
 #!/usr/bin/python3
-
 """
     This file contains functions that read data in xlsx format. They also
     preprocess the data and wrap them into a namedtuple.
 
     Author: Howard Cheung (howard.at@gmail.com)
     Date: 2017/04/11
+    License of the source code: MIT license
 """
 
 # import python internal libraries
