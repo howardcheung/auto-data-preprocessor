@@ -3,3 +3,6 @@ Change log from v0.1.1-alpha to v0.2.0-alpha
 - Fix a bug about extrapolation for data after the ending time of the recorded data
 - Test the code for interpolating data collected at fixed time interval
 - Correct the license of the project and include licenses of other related modules
+- Debug for interpolation calculation error which changes the value of given data points
+- Debug for TypeError due to the use of minimum function on string characters
+- Add tutorial documentation for interpolation
