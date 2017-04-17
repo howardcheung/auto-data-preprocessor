@@ -17,12 +17,16 @@
 This tool is made to assist data analysts who are unfamiliar with coding languages to preprocess their time-series data.
 In a lot of engineering systems, data from different subsystems are obtained differently.
 While some of them are obtained at different fixed time intervals, some of them, such as on/off signals, are obtained according to time-of-value-change.
+Some other data contain invalid or missing data points that results in invalid calculation.
 The resultant data are very difficult for laymen who only use spreadsheet software to analyze their data.
 This project aims at helping these analysts to preprocess their data by converting the time-of-value-change data to data collected at fixed time intervals.
 
 \section{Tutorial}
 
-This tutorial gives a quick tour on how to convert a file with time-of-value-change data to a file at fixed time intervals. First we start with a csv file with the structure in Figure \ref{fig:ugly_file}.
+\subsection{Conversion of time-of-value-change data to data at fixed time interval}
+
+This tutorial gives a quick tour on how to convert a file with time-of-value-change data to a file at fixed time intervals.
+First we start with a csv file with the structure in Figure \ref{fig:ugly_file}.
 
 \begin{figure}[H]
 \centering
@@ -31,9 +35,13 @@ This tutorial gives a quick tour on how to convert a file with time-of-value-cha
 \label{fig:ugly_file}
 \end{figure}
 
-As you can see, there are a lot of unavailable values in Figure \ref{fig:ugly_file}. The timestamps on the left are also ugly because they are all acquired at different time intervals. It is very difficult to try comparing this set of data side-by-side with the other data set.
+As you can see, there are a lot of unavailable values in Figure \ref{fig:ugly_file}.
+The timestamps on the left are also ugly because they are all acquired at different time intervals.
+It is very difficult to try comparing this set of data side-by-side with the other data set.
 
-To convert the data in Figure \ref{fig:ugly_file}, we can use the tool provided in this project. The tool is wrapped as an executable so that you don't have to worry about linking your confidential data to the web to do the filtering. Its user interface is shown in Figure \ref{fig:ui}.
+To convert the data in Figure \ref{fig:ugly_file}, we can use the tool provided in this project.
+The tool is wrapped as an executable so that you don't have to worry about linking your confidential data to the web to do the filtering.
+Its user interface is shown in Figure \ref{fig:ui}.
 
 \begin{figure}[H]
 \centering
@@ -92,14 +100,51 @@ And you can open the file at your selected location as Figure \ref{fig:step}
 \label{fig:step}
 \end{figure}
 
-There are other functions in the tool such as changing the time interval in the output file, using interpolation instead of step function, etc. While they are available for you to explore in this version of tool, their documentation has not been completed. Details of the functions will be discussed in documentation in future versions.
+There are other functions in the tool such as changing the time interval in the output file, using interpolation instead of step function, etc..
+While they are available for you to explore in this version of tool, their documentation has not been completed.
+Details of the functions will be discussed in documentation in future versions.
+
+\subsection{Filling in invalid data points in a data file collected at fixed time interval}
+
+This tutorial demonstrates how to use the tool to fill in invalid data points collected at fixed time interval.
+To start the tutorial, we can consider the \emph{missing\_data.xls} file as shown in Figure \ref{fig:missing_data}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{missing_data.png}
+\caption{Example data file with invalid and missing data points collected at 10-minute interval}
+\label{fig:missing_data}
+\end{figure}
+
+Figure \ref{fig:missing_data} shows a file which data contains the following problems
+\begin{itemize}
+\item String characters within a data point at noon
+\item Multiple data points without any values
+\end{itemize}
+
+To fix the file, we can conduct interpolation with the data adjacent to these problematic data points and fill them in with data from the interpolation.
+To do so, we open the graphical use interface and choose the followings.
+\begin{itemize}
+\item Data file path: click "Browse..." to choose the file \emph{missing\_data.xls}
+\item Existence of a header row: checked
+\item Path to save file: click "Browse..." and choose the directory and file name which you want to save the output file
+\item Format of the time string in the output file: \%Y/\%m/\%d \%H:\%M:\%S (default)
+\item Format of time string in the first column of the input file: \%m/\%d/\%y \%I:\%M:\%S \%p CST
+\item Start time in the new data file: 2017/01/01 11:00 (the starting time of the file in Figure \ref{fig:missing_data}
+\item Autogen ending time: checked
+\item New time interval: 10 minutes (same as that of the file)
+\item Assumption between data points: Continuous variable (inter- and extrapolation)
+\item Assumptions for data points earlier than existing data: Any of them is fine. Our starting time is the same as that of the file
+\end{itemize}
+
+The output file should have the invalid and missing data points filled while other data points should remain unchanged.
 
 \section{Inquiries}
 
-If you encounter bugs about the tool, please send an email to me at howard.at (at) gmail.com or post an issue at \href{https://github.com/howardcheung/auto-data-preprocessor/}{the GitHub repository}.
+If you encounter bugs about the tool, please send an email to me at howard.at (at) gmail.com or post an issue at \href{https://github.com/howardcheung/data-preprocessing-helper/}{the GitHub repository}.
 
 \section{License}
 
-Please refer to the website at \href{https://github.com/howardcheung/auto-data-preprocessor/}{the GitHub repository} for the most up-to-date information about the licenses.
+Please refer to the website at \href{https://github.com/howardcheung/data-preprocessing-helper/}{the GitHub repository} for the most up-to-date information about the licenses.
 
 \end{document}
