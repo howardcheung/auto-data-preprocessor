@@ -118,7 +118,9 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                     final_df.loc[final_df.index[newind-1], :]
             else:
                 for col in final_df.columns:
-                    if isnan(datadf.loc[datadf.index[oldind], col]):
+                    if isinstance(
+                            datadf.loc[datadf.index[oldind], col], str
+                            ) or isnan(datadf.loc[datadf.index[oldind], col]):
                         final_df.loc[final_df.index[newind], col] = \
                             final_df.loc[final_df.index[newind-1], col]
                     else:
@@ -148,7 +150,7 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 try:
                     while isinstance(
                             datadf.loc[datadf.index[oldind], col], str
-                        ) or isnan(datadf.loc[datadf.index[oldind], col]):
+                            ) or isnan(datadf.loc[datadf.index[oldind], col]):
                         oldind += 1
                 except IndexError:  # out of frame. Use the old value
                     oldind = oldoldind
@@ -156,7 +158,7 @@ def convert_df(datadf: DataFrame, start_time: datetime,
                 while newind < newlen and (
                         oldind == oldoldind or
                         final_df.index[newind] <= datadf.index[oldind]
-                    ):
+                        ):
                     if oldind == oldoldind:  # extrapolation at the end
                         final_df.loc[final_df.index[newind], col] = \
                             interpolate_with_s(
@@ -190,14 +192,14 @@ def convert_df(datadf: DataFrame, start_time: datetime,
             with ExcelWriter(
                     output_file, engine='xlsxwriter',
                     datetime_format=output_timestring
-                ) as writer:
+                    ) as writer:
                 final_df.to_excel(writer)
                 writer.save()
         elif output_file.split('.')[-1] == 'xls':
             with ExcelWriter(
-                    output_file, engine = 'xlwt',
+                    output_file, engine='xlwt',
                     datetime_format=output_timestring
-                ) as writer:
+                    ) as writer:
                 final_df.to_excel(writer)
                 writer.save()
         else:
@@ -365,6 +367,16 @@ if __name__ == '__main__':
     NEW_DF = convert_df(
         TEST_DF, datetime(2017, 1, 1, 10, 0), datetime(2017, 1, 1, 22, 00),
         ini_val=1, step=False
+    )
+
+    # test the covert_df function for step function with string characters
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2017, 1, 1, 10, 0), datetime(2017, 1, 1, 22, 00),
+        ini_val=2, step=True
+    )
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2017, 1, 1, 10, 0), datetime(2017, 1, 1, 22, 00),
+        ini_val=1, step=True
     )
 
     print('All functions in', basename(__file__), 'are ok')
