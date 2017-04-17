@@ -49,6 +49,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+For licenses of modules involved in the development of the software,
+please visit <https://github.com/howardcheung/data-preprocessing-helper/>
 """
 
 class MainGUI(wx.Frame):
@@ -512,7 +515,7 @@ class MainGUI(wx.Frame):
         info.SetDescription(DESCRIPTION)
         info.SetCopyright('(C) Copyright 2017 Howard Cheung')
         info.SetWebSite(
-            'https://github.com/howardcheung/auto-data-preprocessor'
+            'https://github.com/howardcheung/data-preprocessing-helper/'
         )
         info.SetLicence(LICENSE)
         info.AddDeveloper('Howard Cheung [howard.at (at) gmail.com]')
