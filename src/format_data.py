@@ -16,7 +16,7 @@ from os.path import dirname
 from pathlib import Path
 
 # import third party libraries
-from pandas import DataFrame, ExcelWriter
+from pandas import DataFrame, ExcelWriter, to_numeric
 
 # import user-defined libraries
 
@@ -101,8 +101,10 @@ def convert_df(datadf: DataFrame, start_time: datetime,
         if final_df.index[0] >= pos or ini_val == 2:
             final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
         else:
-            final_df.loc[final_df.index[0], col] = \
-                datadf[col].dropna().unique().min()
+            # use to_numeric to push all non-numeric data to NaN values
+            final_df.loc[final_df.index[0], col] = to_numeric(
+                datadf[col], errors='coerce'
+            ).dropna().unique().min()
 
     if step:  # assume step function
         # continue to append new columns until the end
@@ -357,5 +359,12 @@ if __name__ == '__main__':
         TEST_DF.loc[datetime(2017, 1, 1, 11, 50), 'Pressure'] +
         TEST_DF.loc[datetime(2017, 1, 1, 12, 10), 'Pressure']
     )/2.0
+
+    # test the covert_df function for minimum initial values when string
+    # characters are involved
+    NEW_DF = convert_df(
+        TEST_DF, datetime(2017, 1, 1, 10, 0), datetime(2017, 1, 1, 22, 00),
+        ini_val=1, step=False
+    )
 
     print('All functions in', basename(__file__), 'are ok')
