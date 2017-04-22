@@ -7,7 +7,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \author{Howard Cheung \\ email: howard.at (at) gmail.com }
-\title{User manual for the Data Preprocessing Helper Version 0.1}
+\title{User manual for the Data Preprocessing Helper Version 0.2.1}
 \begin{document}
 
 \maketitle
@@ -125,7 +125,7 @@ Figure \ref{fig:missing_data} shows a file which data contains the following pro
 To fix the file, we can conduct interpolation with the data adjacent to these problematic data points and fill them in with data from the interpolation.
 To do so, we open the graphical use interface and choose the followings.
 \begin{itemize}
-\item Data file path: click "Browse..." to choose the file \emph{missing\_data.xls}
+\item Data file path: click "Browse..." to choose the file \emph{MissingData.xls}
 \item Existence of a header row: checked
 \item Path to save file: click "Browse..." and choose the directory and file name which you want to save the output file
 \item Format of the time string in the output file: \%Y/\%m/\%d \%H:\%M:\%S (default)
@@ -153,5 +153,21 @@ If you encounter bugs about the tool, please send an email to me at howard.at (a
 \section{License}
 
 Please refer to the website at \href{https://github.com/howardcheung/data-preprocessing-helper/}{the GitHub repository} for the most up-to-date information about the licenses.
+
+\section{Acknowledgement}
+
+The developer(s) would like to acknowledge the followings for the inspiration and resources for the development of the software.
+
+People (in alphabetical order of the family name):
+\begin{itemize}
+\item Dr. Diance Gao at Sun Yat-san University
+\item Prof. Shengwei Wang at the Hong Kong Polytechnic University
+\item Mr. KL William Wu at the Hong Kong Polytechnic University
+\end{itemize}
+
+Project (in alphabetical order of the project name):
+\begin{itemize}
+\item Energy Performance Assessment and Optimization on Buildings in PolyU Campus - Stage 1 and Whole Campus at the Hong Kong Polytechnic University
+\end{itemize}
 
 \end{document}
