@@ -511,7 +511,7 @@ class MainGUI(wx.Frame):
 
         info = adv.AboutDialogInfo()
         info.SetName('Data Preprocessing Helper')
-        info.SetVersion('0.1')
+        info.SetVersion('0.2.1')
         info.SetDescription(DESCRIPTION)
         info.SetCopyright('(C) Copyright 2017 Howard Cheung')
         info.SetWebSite(
