@@ -66,3 +66,8 @@ Please notice that the software is developed based on Python 3.5.1 and the binar
 | xlwt (1.2.0) | [Link](https://github.com/python-excel/xlwt/blob/917a8ad8db35d6e8abb306a2fda2ace648a6ab89/docs/licenses.rst) |
 
 The licenses of these modules are included in the directory LICENSE.
+
+# Acknowlegement
+
+The developer(s) would like to acknowledge the inspiration of Prof. Shengwei Wang and Mr. KL William Wu at the Hong Kong Polytechnic University and Dr. Diance Gao at Sun Yat-san University for the creation of this software.
+The developer(s) would also like to acknowledge the support of the project *Energy Performance Assessment and Optimization on Buildings in PolyU Campus - Stage 1 and Whole Campus* at the Hong Kong Polytechnic University which needs results in the development of the software.
