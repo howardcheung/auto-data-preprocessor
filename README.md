@@ -34,7 +34,7 @@ If you want, you can also assume the values to be interpolated values
 
 ## License of this software
 
-The source code written in this repository is distributed under the MIT license and is free for personal, academic and commercial use. Details can be found in the file *LICENSE_REPO* in this directory.
+The source code written in this repository is distributed under the MIT license and is free for personal, academic and commercial use. Details can be found in the file *LICENSE_REPO* in the `LICENSE` directory.
 
 The binaries distributed under releases, due to its inclusion of other modules, are distributed under the GNU GPLv3 license. Details can be found in the file *LICENSE_BINARY* in this directory.
 
@@ -43,7 +43,7 @@ The binaries distributed under releases, due to its inclusion of other modules, 
 Please notice that the software is developed based on Python 3.5.1 and the binaries contain the following modules:
 
 | Modules | License website |
-| :-----: | :-----: |
+| ------- | ------- |
 | appdirs (1.4.3) | [Link](https://github.com/ActiveState/appdirs/blob/master/LICENSE.txt) |
 | future (0.16.0) | [Link](http://python-future.org/credits.html) |
 | numpy (1.12.1) | [Link](http://www.numpy.org/license.html) |
