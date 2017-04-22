@@ -36,7 +36,7 @@ def read_data(filename: str, header: int=None,
         filename: string
             path to the data file
 
-        header_col: int, list of ints, default None
+        header: int, list of ints, default None
             Row (0-indexed) to use for the column labels of the parsed
             DataFrame. If a list of integers is passed those row positions
             will be combined into a MultiIndex. Default None
@@ -231,7 +231,7 @@ if __name__ == '__main__':
 
     from os.path import basename
 
-    # FILENAME = '../dat/fixed_time_interval.csv'
+    # FILENAME = 'missing_data.xls'
     # print('Testing file import by using ', FILENAME)
     # TEST_DF = read_data(FILENAME, header=None, duration=True,
                         # interpolation=True)
@@ -243,6 +243,17 @@ if __name__ == '__main__':
     FILENAME = '../dat/time_of_change.csv'
     print('Testing file import by using ', FILENAME)
     TEST_DF = read_data(FILENAME, header=0)
+    assert isinstance(TEST_DF.index[0], Timestamp)
+    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
+    assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
+    assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
+    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
+    assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
+
+    # test for multi-header
+    FILENAME = '../dat/time_of_change_multiheader.csv'
+    print('Testing file import by using ', FILENAME)
+    TEST_DF = read_data(FILENAME, header=1)
     assert isinstance(TEST_DF.index[0], Timestamp)
     assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
     assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])

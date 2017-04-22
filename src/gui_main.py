@@ -135,6 +135,19 @@ class MainGUI(wx.Frame):
         )
         self.header = wx.CheckBox(panel, pos=(sec_blk, layer_depth))
         self.header.SetValue(True)
+        # for the positioning of the header numeric function
+        wx.StaticText(
+            panel, label=u''.join([
+                'Number of rows to be skipped\nabove the header row:'
+            ]), pos=(third_blk-150, layer_depth), size=(150, 30)
+        )
+        self.header_no = wx.SpinCtrl(
+            panel, value='0', min=0, max=100000,  # max: approx. 1 month
+            pos=(third_blk+20, layer_depth),
+            size=(50, 20)
+        )
+        # add the dynamic information of the checkbox
+        self.header.Bind(wx.EVT_CHECKBOX, self.HeaderInput)
         layer_depth += layer_diff
 
         # Inputs to the directory to save the plots
@@ -462,6 +475,16 @@ class MainGUI(wx.Frame):
             ])
         )
 
+    def HeaderInput(self, evt):
+        """
+            Function to allow input of file header informaiton if the
+            existence of a header is confirmed
+        """
+        if evt.IsChecked():
+            self.header_no.Enable(True)
+        else:
+            self.header_no.Enable(False)
+
     def ChangeStartDayLimit(self, evt):
         """
             Function to change the limit of the starting day selection
@@ -563,9 +586,10 @@ class MainGUI(wx.Frame):
         # Run the analyzer
         # output any error to a message box if needed
         try:
+            header_exist = self.header.GetValue()
             datadf = read_data(
                 self.dfpath.GetValue(),
-                header=(0 if self.header.GetValue() else None),
+                header=(self.header_no.GetValue() if header_exist else None),
                 time_format=self.timestring.GetValue()
             )
             convert_df(
