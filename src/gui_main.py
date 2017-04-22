@@ -142,7 +142,7 @@ class MainGUI(wx.Frame):
             ]), pos=(third_blk-150, layer_depth), size=(150, 30)
         )
         self.header_no = wx.SpinCtrl(
-            panel, value='1', min=1, max=100000,  # max: approx. 1 month
+            panel, value='0', min=0, max=100000,  # max: approx. 1 month
             pos=(third_blk+20, layer_depth),
             size=(50, 20)
         )
@@ -480,8 +480,10 @@ class MainGUI(wx.Frame):
             Function to allow input of file header informaiton if the
             existence of a header is confirmed
         """
-        if event.IsChecked():
-            pass
+        if evt.IsChecked():
+            self.header_no.Enable(True)
+        else:
+            self.header_no.Enable(False)
 
     def ChangeStartDayLimit(self, evt):
         """
@@ -584,9 +586,10 @@ class MainGUI(wx.Frame):
         # Run the analyzer
         # output any error to a message box if needed
         try:
+            header_exist = self.header.GetValue()
             datadf = read_data(
                 self.dfpath.GetValue(),
-                header=(0 if self.header.GetValue() else None),
+                header=(self.header_no.GetValue() if header_exist else None),
                 time_format=self.timestring.GetValue()
             )
             convert_df(
