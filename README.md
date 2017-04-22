@@ -19,10 +19,12 @@ If you want, you can also assume the values to be interpolated values
 
 
 # Work to be done:
+- add inputs for location of timestamp
+- add inputs for number of headers
+- read multiple worksheet in Excel file
 - add intermediate timestamp to the output dataframe
-- use upx to reduce the size of the executable
 - write the user manual
-- organize the license files of the modules 
+- use upx to reduce the size of the executable
 
 # Diretories
 * `dat`: directory that stores testing data
