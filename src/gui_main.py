@@ -72,7 +72,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(625, 650)
+            parent, title=title, size=(700, 700)
         )  # size of the application window
 
         self.initui()
@@ -100,8 +100,8 @@ class MainGUI(wx.Frame):
         begin_depth = 20
         layer_diff = 40
         first_blk = 20
-        sec_blk = 200
-        third_blk = 475
+        sec_blk = 250
+        third_blk = 525
 
         # title
         # position: (from top to bottom, from left to right)
@@ -223,7 +223,7 @@ class MainGUI(wx.Frame):
         # create spin control for the date and time
         self.start_yr = wx.SpinCtrl(
             panel, value='2017', min=1, max=4000,
-            pos=(sec_blk, layer_depth), size=(50, 20)
+            pos=(sec_blk, layer_depth), size=(55, 20)
         )
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
@@ -283,7 +283,7 @@ class MainGUI(wx.Frame):
         # create spin control for the date and time
         self.end_yr = wx.SpinCtrl(
             panel, value='2017', min=1, max=4000,
-            pos=(sec_blk, layer_depth), size=(50, 20)
+            pos=(sec_blk, layer_depth), size=(55, 20)
         )
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
@@ -391,7 +391,7 @@ class MainGUI(wx.Frame):
 
         # buttons at the bottom
         button_ok = wx.Button(
-            panel, label=u'Preprocess', pos=(500, layer_depth)
+            panel, label=u'Preprocess', pos=(third_blk+50, layer_depth)
         )
         button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
         layer_depth += layer_diff
