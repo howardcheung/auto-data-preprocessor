@@ -249,15 +249,19 @@ if __name__ == '__main__':
     # assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
 
-    FILENAME = '../dat/time_of_change-semicolon.csv'
-    print('Testing file import by using ', FILENAME)
-    TEST_DF = read_data(FILENAME, header=0)
-    assert isinstance(TEST_DF.index[0], Timestamp)
-    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
-    assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
-    assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
-    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
-    assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
+    for FILENAME in [
+        '../dat/time_of_change-semicolon.csv',
+        '../dat/time_of_change-tab.csv',
+        '../dat/time_of_change.csv'
+    ]:
+        print('Testing file import by using ', FILENAME)
+        TEST_DF = read_data(FILENAME, header=0)
+        assert isinstance(TEST_DF.index[0], Timestamp)
+        assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
+        assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
+        assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
+        assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
+        assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
 
     # test for multi-header
     FILENAME = '../dat/time_of_change_multiheader.csv'
