@@ -9,3 +9,4 @@ This directory stores example data files
 * `time_of_change_noheader.csv`: same as `time_of_change.csv` except the absence of the header
 * `time_of_change_multiheader.csv`: same as `time_of_change.csv` except an additional row above the header
 * `time_of_change-semicolon.csv`: example data collected at change of value with ';' as the separator
+* `time_of_change-trimmed.csv`: example data collected at change of value with a whole column of invalid data

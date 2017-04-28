@@ -30,7 +30,8 @@ def convert_df(datadf: DataFrame, start_time: datetime,
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
-        Return a pandas DataFrame collected at fixed intervals
+        Return a pandas DataFrame collected at fixed intervals. If a column
+        contains no valid values, it returns a column of NaN values instead.
 
         Inputs:
         ==========
