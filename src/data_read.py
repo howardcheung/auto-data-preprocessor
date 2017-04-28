@@ -240,11 +240,18 @@ if __name__ == '__main__':
 
     from os.path import basename
 
-    # FILENAME = 'missing_data.xls'
-    # print('Testing file import by using ', FILENAME)
-    # TEST_DF = read_data(FILENAME, header=None, duration=True,
-                        # interpolation=True)
-    # assert isinstance(TEST_DF.index[0], Timestamp)
+    FILENAME = '../dat/date.csv'
+    print('Testing file import by using ', FILENAME)
+    TEST_DF = read_data(
+        FILENAME, header=0, time_format='%Y-%m-%d'
+    )
+    assert isinstance(TEST_DF.index[0], Timestamp)
+
+    FILENAME = '../dat/missing_data.xls'
+    print('Testing file import by using ', FILENAME)
+    TEST_DF = read_data(FILENAME, header=1, duration=True,
+                        interpolation=True)
+    assert isinstance(TEST_DF.index[0], Timestamp)
     # assert TEST_DF.loc[TEST_DF.index[0], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
