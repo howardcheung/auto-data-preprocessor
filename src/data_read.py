@@ -73,6 +73,9 @@ def read_data(filename: str, header: int=None,
         if pddf.shape[1] == 1:
             # one column only including the index. The separator is wrong.
             pddf = read_csv(filename, header=header, sep=';')
+        if pddf.shape[1] == 1:
+            # one column only including the index. The separator is wrong.
+            pddf = read_csv(filename, header=header, sep='\t')
     else:
         raise ValueError(''.join([
             'The file extension of the data file cannot be recognized by ',
