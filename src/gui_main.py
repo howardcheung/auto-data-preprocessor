@@ -54,6 +54,7 @@ For licenses of modules involved in the development of the software,
 please visit <https://github.com/howardcheung/data-preprocessing-helper/>
 """
 
+
 class MainGUI(wx.Frame):
     """
         Class to hold the object for the main window of the application
@@ -596,23 +597,76 @@ class MainGUI(wx.Frame):
                datadf, start_time,
                (None if self.no_endtime.GetValue() else end_time),
                interval=int(self.time_int.GetValue())*60,
-               step=(True if self.func_choice.GetSelection()==0 else False),
+               step=(True if self.func_choice.GetSelection() == 0 else False),
                ini_val=self.early_pts.GetSelection()+1,
                output_file=self.newdfpath.GetValue(),
                sep=self.output_sep.GetValue(),
                output_timestring=self.outputtimestring.GetValue()
             )
         except BaseException:
-            box = wx.MessageDialog(
-                self, format_exc(), u'Error', wx.OK | wx.ICON_INFORMATION
-            )
-            box.Fit()
-            box.ShowModal()
+            # box = wx.MessageDialog(
+                # self, format_exc(), u'Error', wx.OK | wx.ICON_INFORMATION
+            # )
+            chgdep = ErrorReportingDialog(None)
+            chgdep.ShowModal()
+            chgdep.Destroy()
             return
 
         # function to be called upon finishing processing
         wx.CallLater(0, self.ShowMessage)
         evt.Skip()
+
+
+class ErrorReportingDialog(wx.Dialog):
+    """
+        Error Diaglog box
+        from http://zetcode.com/wxpython/dialogs/
+    """
+
+    def __init__(self, *args, **kw):
+        """
+            Initializing the dialog box
+        """
+        super(ErrorReportingDialog, self).__init__(*args, **kw)
+
+        self.InitUI()
+        self.SetSize((500, 200))
+        self.SetTitle(u'Error')
+
+    def InitUI(self):
+        """
+            Interface of the error dialog box
+        """
+
+        pnl = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        sb = wx.StaticBox(
+            pnl, label=u'Please report the following error messages:'
+        )
+        sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)
+        vv = format_exc()
+        sbs.Add(wx.TextCtrl(pnl, value=format_exc(), size=(450, 200)))
+
+        pnl.SetSizer(sbs)
+
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        closeButton = wx.Button(self, label='Close')
+        hbox2.Add(closeButton, flag=wx.LEFT, border=5)
+
+        vbox.Add(pnl, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+        vbox.Add(hbox2, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+
+        self.SetSizer(vbox)
+
+        closeButton.Bind(wx.EVT_BUTTON, self.OnClose)
+
+    def OnClose(self, e):
+        """
+            Close the error dialog box
+        """
+
+        self.Destroy()
 
 
 # define functions
