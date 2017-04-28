@@ -630,7 +630,7 @@ class ErrorReportingDialog(wx.Dialog):
         super(ErrorReportingDialog, self).__init__(*args, **kw)
 
         self.InitUI()
-        self.SetSize((500, 200))
+        self.SetSize((500, 400))
         self.SetTitle(u'Error')
 
     def InitUI(self):
@@ -645,8 +645,11 @@ class ErrorReportingDialog(wx.Dialog):
             pnl, label=u'Please report the following error messages:'
         )
         sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)
-        vv = format_exc()
-        sbs.Add(wx.TextCtrl(pnl, value=format_exc(), size=(450, 200)))
+        # sbs.Add(wx.TextCtrl(pnl, value=format_exc(), size=(450, 200)))
+        sbs.Add(wx.TextCtrl(
+            pnl, value=format_exc(), size=(475, 400),
+            style=wx.TE_READONLY | wx.TE_MULTILINE
+        ))
 
         pnl.SetSizer(sbs)
 
