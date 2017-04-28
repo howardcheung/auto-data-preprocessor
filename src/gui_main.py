@@ -641,9 +641,9 @@ class ErrorReportingDialog(wx.Dialog):
         pnl = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        sb = wx.StaticBox(
-            pnl, label=u'Please report the following error messages:'
-        )
+        sb = wx.StaticBox(pnl, label=u''.join([
+            u'Process failed. Please report your situation with the following error messages:'
+        ]))
         sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)
         sbs.Add(wx.TextCtrl(
             pnl, value=format_exc(), size=(475, 400),
