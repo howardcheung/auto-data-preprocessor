@@ -93,6 +93,8 @@ def convert_df(datadf: DataFrame, start_time: datetime,
     ini_val_pos = []  # locations of the good initial values
     for col in final_df.columns:
         # find the appearance of the first value
+        # initialize the position for data that contain no good values
+        pos = datadf.index[-1]
         for ind_oldind, oldind in enumerate(datadf.index):
             if not isnan(datadf.loc[oldind, col]):
                 pos = oldind
@@ -102,9 +104,12 @@ def convert_df(datadf: DataFrame, start_time: datetime,
             final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
         else:
             # use to_numeric to push all non-numeric data to NaN values
-            final_df.loc[final_df.index[0], col] = to_numeric(
-                datadf[col], errors='coerce'
-            ).dropna().unique().min()
+            try:
+                final_df.loc[final_df.index[0], col] = to_numeric(
+                    datadf[col], errors='coerce'
+                ).dropna().unique().min()
+            except ValueError:  # no valid values
+                final_df.loc[:, col] = float('nan')
 
     if step:  # assume step function
         # continue to append new columns until the end
@@ -261,6 +266,16 @@ if __name__ == '__main__':
     from data_read import read_data
 
     from pandas import read_csv, read_excel, Timestamp
+
+    # check what happen to data that contain no good values
+
+    # check function for computer-generated ending time
+    FILENAME = '../dat/time_of_change-trimmed.csv'
+    TEST_DF = read_data(FILENAME, header=0)
+    NEW_DF = convert_df(TEST_DF, datetime(2017, 1, 1, 0, 0))
+    assert isinstance(NEW_DF, DataFrame)
+    # keeping the invalid values
+    assert len(NEW_DF.loc[:, 'Item 1'].dropna()) == 0
 
     # check function for computer-generated ending time
     FILENAME = '../dat/time_of_change.csv'
