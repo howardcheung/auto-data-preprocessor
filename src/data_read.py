@@ -83,10 +83,13 @@ def read_data(filename: str, header: int=None,
     pddf.columns = ['Time']+pddf.columns.tolist()[1:]
 
     # make time column as the index
-    pddf.loc[:, 'Time'] = [
-        datetime.strptime(timestr, time_format)
-        for timestr in pddf.loc[:, 'Time']
-    ]
+    try:
+        pddf.loc[:, 'Time'] = [
+            datetime.strptime(timestr, time_format)
+            for timestr in pddf.loc[:, 'Time']
+        ]
+    except TypeError:  # the time string has been converted by pandas
+        pass
     pddf.set_index('Time', inplace=True)
 
     # not using numpy for license issue
