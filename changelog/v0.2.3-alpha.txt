@@ -1,3 +1,4 @@
 Change log from v0.2.2-alpha to v0.2.3-alpha
 =======================================================
 - Change the error dialog box so that the error messages can be copied
+- Load csv files with separators ";" correctly

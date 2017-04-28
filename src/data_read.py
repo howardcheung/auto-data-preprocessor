@@ -70,6 +70,9 @@ def read_data(filename: str, header: int=None,
                 break
     elif ext == 'csv':
         pddf = read_csv(filename, header=header)
+        if pddf.shape[1] == 1:
+            # one column only including the index. The separator is wrong.
+            pddf = read_csv(filename, header=header, sep=';')
     else:
         raise ValueError(''.join([
             'The file extension of the data file cannot be recognized by ',
@@ -240,7 +243,7 @@ if __name__ == '__main__':
     # assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
 
-    FILENAME = '../dat/time_of_change.csv'
+    FILENAME = '../dat/time_of_change-semicolon.csv'
     print('Testing file import by using ', FILENAME)
     TEST_DF = read_data(FILENAME, header=0)
     assert isinstance(TEST_DF.index[0], Timestamp)
