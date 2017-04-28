@@ -11,6 +11,7 @@
 # import python internal modules
 from calendar import monthrange
 from datetime import datetime
+from math import isnan
 from os.path import isfile, dirname
 from pathlib import Path
 from traceback import format_exc
@@ -593,6 +594,16 @@ class MainGUI(wx.Frame):
                 header=(self.header_no.GetValue() if header_exist else None),
                 time_format=self.timestring.GetValue()
             )
+            # show warning for columns that contain no valid data
+            for col in datadf.columns:
+                if all([isnan(x) for x in datadf.loc[:, col]]):
+                    dlg = MessageDlg(''.join([
+                            'Column ', col,
+                            ' does not contain any valid values.',
+                            ' Closing in 2s......'
+                        ]), u'Warning')        
+                    wx.CallLater(2000, dlg.Destroy)
+                    dlg.ShowModal()
             convert_df(
                datadf, start_time,
                (None if self.no_endtime.GetValue() else end_time),
@@ -615,6 +626,28 @@ class MainGUI(wx.Frame):
         # function to be called upon finishing processing
         wx.CallLater(0, self.ShowMessage)
         evt.Skip()
+
+
+class MessageDlg(wx.Dialog):
+    """
+        Function for auto-closing message diaglog
+        from https://stackoverflow.com/questions/6012380/wxmessagebox-with-an-auto-close-timer-in-wxpython
+    """
+    def __init__(self, message, title):
+        """
+            Initailizing a new dialog box that can be closed automatically
+        """
+        wx.Dialog.__init__(self, None, -1, title, size=(400, 120))
+        self.CenterOnScreen(wx.BOTH)
+
+        ok = wx.Button(self, wx.ID_OK, "OK")
+        ok.SetDefault()
+        text = wx.StaticText(self, -1, message)
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        vbox.Add(text, 1, wx.ALIGN_CENTER | wx.TOP, 10)
+        vbox.Add(ok, 1, wx.ALIGN_CENTER | wx.BOTTOM, 10)
+        self.SetSizer(vbox)
 
 
 class ErrorReportingDialog(wx.Dialog):
