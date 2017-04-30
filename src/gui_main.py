@@ -275,7 +275,7 @@ class MainGUI(wx.Frame):
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
         self.use_starttime = wx.CheckBox(panel, pos=(sec_blk+70*5, layer_depth+2))
-        self.use_starttime.SetValue(False)
+        self.use_starttime.SetValue(True)
         wx.StaticText(
             panel, label=u'Use file\nstarting time',
             pos=(sec_blk+70*5, layer_depth+20)
@@ -611,7 +611,7 @@ class MainGUI(wx.Frame):
                     wx.CallLater(2000, dlg.Destroy)
                     dlg.ShowModal()
             convert_df(
-               datadf, start_time,
+               datadf, (None if self.use_starttime.GetValue() else start_time),
                (None if self.no_endtime.GetValue() else end_time),
                interval=int(self.time_int.GetValue())*60,
                step=(True if self.func_choice.GetSelection() == 0 else False),
