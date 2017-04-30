@@ -22,7 +22,7 @@ from pandas import DataFrame, ExcelWriter, to_numeric
 
 
 # write functions
-def convert_df(datadf: DataFrame, start_time: datetime,
+def convert_df(datadf: DataFrame, start_time: datetime=None,
                end_time: datetime=None, interval: float=600,
                step: bool=True, ini_val: int=1,
                output_file: str=None, sep: str=';',
@@ -40,7 +40,8 @@ def convert_df(datadf: DataFrame, start_time: datetime,
             data collected at time of change
 
         start_time: datetime.datetime
-            user-defined starting time
+            user-defined starting time. If none is input, use the first
+            datetime given in the datadf
 
         end_time: datatime.datetime
             users preliminary override of the ending time of the new
@@ -72,6 +73,9 @@ def convert_df(datadf: DataFrame, start_time: datetime,
         output_timestring: str
             format time string in the output file. Default '%Y-%m-%d %H:%M:%S'
     """
+
+    if start_time is None:
+        start_time = datadf.index[0]  # intialize it with the dataframe
 
     # calculate the ending index for the new dataframe
     num = 1
@@ -268,9 +272,15 @@ if __name__ == '__main__':
 
     from pandas import read_csv, read_excel, Timestamp
 
-    # check what happen to data that contain no good values
+    # check function for no start_time
+    FILENAME = '../dat/time_of_change-trimmed.csv'
+    TEST_DF = read_data(FILENAME, header=0)
+    NEW_DF = convert_df(TEST_DF)
+    assert isinstance(NEW_DF, DataFrame)
+    # same index in the beginning?
+    assert NEW_DF.index[0] == TEST_DF.index[0]
 
-    # check function for computer-generated ending time
+    # check what happen to data that contain no good values
     FILENAME = '../dat/time_of_change-trimmed.csv'
     TEST_DF = read_data(FILENAME, header=0)
     NEW_DF = convert_df(TEST_DF, datetime(2017, 1, 1, 0, 0))
