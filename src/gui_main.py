@@ -595,23 +595,28 @@ class MainGUI(wx.Frame):
         # output any error to a message box if needed
         try:
             header_exist = self.header.GetValue()
-            datadf = read_data(
+            datadfs = read_data(
                 self.dfpath.GetValue(),
                 header=(self.header_no.GetValue() if header_exist else None),
                 time_format=self.timestring.GetValue()
             )
             # show warning for columns that contain no valid data
-            for col in datadf.columns:
-                if all([isnan(x) for x in datadf.loc[:, col]]):
-                    dlg = MessageDlg(''.join([
-                            'Column ', col,
-                            ' does not contain any valid values.',
-                            ' Closing in 2s......'
-                        ]), u'Warning')        
-                    wx.CallLater(2000, dlg.Destroy)
-                    dlg.ShowModal()
+            for sheet_name in datadfs:
+                datadf = datadfs[sheet_name]
+                for col in datadf.columns:
+                    if all([
+                        isinstance(x, str) or isnan(x)
+                        for x in datadf.loc[:, col]
+                    ]):
+                        dlg = MessageDlg(''.join([
+                                'Column ', col, ' in ', sheet_name, 
+                                ' does not contain any valid values.',
+                                ' Closing in 2s......'
+                            ]), u'Warning')        
+                        wx.CallLater(2000, dlg.Destroy)
+                        dlg.ShowModal()
             convert_df(
-               datadf, (None if self.use_starttime.GetValue() else start_time),
+               datadfs, (None if self.use_starttime.GetValue() else start_time),
                (None if self.no_endtime.GetValue() else end_time),
                interval=int(self.time_int.GetValue())*60,
                step=(True if self.func_choice.GetSelection() == 0 else False),
