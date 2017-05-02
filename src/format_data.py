@@ -293,6 +293,15 @@ if __name__ == '__main__':
         for sheet_name in xlsx.sheet_names:
             assert sheet_name in NEW_DFS.keys()
     remove('./testresult.xlsx')
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 11, 0), datetime(2017, 1, 1, 22, 00),
+        ini_val=2, step=False, output_file='./testresult.xls'
+    )
+    with ExcelFile('./testresult.xls') as xlsx:
+        assert len(xlsx.sheet_names) == 3
+        for sheet_name in xlsx.sheet_names:
+            assert sheet_name in NEW_DFS.keys()
+    remove('./testresult.xls')
 
     # check function for no start_time
     FILENAME = '../dat/time_of_change-trimmed.csv'
