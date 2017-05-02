@@ -279,7 +279,20 @@ if __name__ == '__main__':
     from os import remove
     from data_read import read_data
 
-    from pandas import read_csv, read_excel, Timestamp
+    from pandas import read_csv, read_excel, Timestamp, ExcelFile
+
+    # test the writing of multiple sheets
+    FILENAME = '../dat/missing_data.xlsx'
+    TEST_DFS = read_data(FILENAME, header=0, sheetnames=[])
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 11, 0), datetime(2017, 1, 1, 22, 00),
+        ini_val=2, step=False, output_file='./testresult.xlsx'
+    )
+    with ExcelFile('./testresult.xlsx') as xlsx:
+        assert len(xlsx.sheet_names) == 3
+        for sheet_name in xlsx.sheet_names:
+            assert sheet_name in NEW_DFS.keys()
+    remove('./testresult.xlsx')
 
     # check function for no start_time
     FILENAME = '../dat/time_of_change-trimmed.csv'
