@@ -53,7 +53,8 @@ def read_data(filename: str, header: int=None,
 
         sheetnames: list
             list of string for the name of worksheets to be imported. Default
-            None which means that only the first sheet will be imported
+            None which means that only the first sheet will be imported.
+            If [] is given, all sheets will be read.
 
         interpolation: bool
             if the code should conduct an interpolation for values that are
@@ -101,6 +102,11 @@ def read_data(filename: str, header: int=None,
                         xlsx, sheet_name, header=header
                     ))
                     break  # read first sheet
+            elif sheetnames == []:  # empty list implies all sheets
+                for sheet_name in xlsx.sheet_names:
+                    pddfs[sheet_name] = _time_config(read_excel(
+                        xlsx, sheet_name, header=header
+                    ))
             else:
                 for sheet_name in sheetnames:
                     pddfs[sheet_name] = _time_config(read_excel(
@@ -271,9 +277,11 @@ if __name__ == '__main__':
     FILENAME = '../dat/missing_data.xlsx'
     print('Testing file import by using ', FILENAME)
     TEST_DFS = read_data(FILENAME, header=0, sheetnames=['Sheet1', 'Sheet2'])
-    import pdb; pdb.set_trace()
     assert TEST_DFS['Sheet1'].columns.tolist()[0] == 'Pressure'
-    assert TEST_DFS['Sheet2'].columns.tolist()[1] == 'Cost'
+    assert TEST_DFS['Sheet2'].columns.tolist()[0] == 'Cost'
+
+    TEST_DFS = read_data(FILENAME, header=0, sheetnames=[])
+    assert TEST_DFS['Sheet3'].columns.tolist()[0] == 'Price'
 
     # testing import with dates
     FILENAME = '../dat/date.csv'
