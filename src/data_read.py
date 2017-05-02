@@ -34,7 +34,7 @@ def read_data(filename: str, header: int=None,
         duration of each data point in seconds. Since the file may be an xls
         file that contains multiple worksheets, the final returned result
         is a python dict object with key values being the sheet names and dict
-        values being the dataframes. 
+        values being the dataframes.
 
         Inputs:
         ==========
@@ -95,7 +95,7 @@ def read_data(filename: str, header: int=None,
     pddfs = {}
     if ext == 'xlsx' or ext == 'xls':
         with ExcelFile(filename) as xlsx:
-            if sheetnames == None:
+            if sheetnames is None:
                 for sheet_name in xlsx.sheet_names:
                     pddfs[sheet_name] = _time_config(read_excel(
                         xlsx, sheet_name, header=header
@@ -267,6 +267,15 @@ if __name__ == '__main__':
 
     from os.path import basename
 
+    # testing file reading with multiple worksheets
+    FILENAME = '../dat/missing_data.xlsx'
+    print('Testing file import by using ', FILENAME)
+    TEST_DFS = read_data(FILENAME, header=0, sheetnames=['Sheet1', 'Sheet2'])
+    import pdb; pdb.set_trace()
+    assert TEST_DFS['Sheet1'].columns.tolist()[0] == 'Pressure'
+    assert TEST_DFS['Sheet2'].columns.tolist()[1] == 'Cost'
+
+    # testing import with dates
     FILENAME = '../dat/date.csv'
     print('Testing file import by using ', FILENAME)
     TEST_DF = read_data(
@@ -276,7 +285,7 @@ if __name__ == '__main__':
 
     FILENAME = '../dat/missing_data.xls'
     print('Testing file import by using ', FILENAME)
-    TEST_DF = read_data(FILENAME, header=1, duration=True,
+    TEST_DF = read_data(FILENAME, header=0, duration=True,
                         interpolation=True)
     assert isinstance(TEST_DF['Sheet1'].index[0], Timestamp)
     # assert TEST_DF.loc[TEST_DF.index[0], 'Duration'] == 60*30
