@@ -653,7 +653,7 @@ class MainGUI(wx.Frame):
                     [] if self.loadallsheets.GetValue() else (
                         None
                         if get_ext(self.dfpath.GetValue()) == 'csv'
-                        else self.sheetname.GetValue()
+                        else [self.sheetname.GetValue()]
                     )
                 )
             )
