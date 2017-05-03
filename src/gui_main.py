@@ -12,12 +12,14 @@
 from calendar import monthrange
 from datetime import datetime
 from math import isnan
+from ntpath import split
 from os.path import isfile, dirname
 from pathlib import Path
 from traceback import format_exc
 from webbrowser import open as webbrowseropen
 
 # import third party modules
+from pandas import ExcelFile
 import wx
 from wx import adv
 
@@ -461,9 +463,23 @@ class MainGUI(wx.Frame):
         filepath = openFileDialog.GetPath()
         self.dfpath.SetValue(filepath)
 
+        # check if file exists
         if not isfile(filepath):
             wx.LogError('Cannot open file "%s".' % openFileDialog.GetPath())
             return False
+
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        ext = split(filepath)[1].split('.')[-1]
+        if ext == 'xls' or ext == 'xlsx':
+            if not self.loadallsheets.GetValue():
+                self.sheetname.Enable(True)
+            with ExcelFile(filepath) as xlsx:
+                sheetnames = xlsx.sheet_names
+                self.sheetname.SetItems(sheetnames)
+                self.sheetname.SetValue(sheetnames[0])
+        else:
+            self.sheetname.Enable(False)
 
     def SaveOpen(self, evt):
         """
