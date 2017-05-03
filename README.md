@@ -19,18 +19,21 @@ If you want, you can also assume the values to be interpolated values
 
 
 # Work to be done:
-- add inputs for location of timestamp
 - add inputs for number of headers
 - read multiple worksheet in Excel file
 - add intermediate timestamp to the output dataframe
+- add tab to choose results depending on time range and weekday ranges
 - write the user manual
-- use upx to reduce the size of the executable
 
-# Diretories
+# Diretories and files
+* `changelog`: directory that stores changelog of the software for different versions
 * `dat`: directory that stores testing data
 * `doc`: directory that stores the user manual
-* `src`: directory that stores the source python script files
+* `exe`: directory that stores instructions on how to compile the binary
 * `licenses`: directory that contains licenses of the modules
+* `src`: directory that stores the source python script files
+* `LICENSE_BINARY`: license file for the software
+* `README.md`: file of Markdown script for this readme
 
 # Licenses
 
