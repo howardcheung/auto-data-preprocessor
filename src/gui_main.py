@@ -74,7 +74,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(700, 700)
+            parent, title=title, size=(720, 750)
         )  # size of the application window
 
         self.initui()
@@ -151,6 +151,24 @@ class MainGUI(wx.Frame):
         # add the dynamic information of the checkbox
         self.header.Bind(wx.EVT_CHECKBOX, self.HeaderInput)
         layer_depth += layer_diff
+
+        # option to select sheet, if any, and choose if all sheets
+        # should be loaded
+        wx.StaticText(panel, label=u''.join([
+            u'Choose a worksheet to load\n',
+            u'for xls/xlsx input file:'
+        ]), pos=(first_blk, layer_depth-5))
+        self.sheetname = wx.ComboBox(
+            panel, pos=(sec_blk, layer_depth), size=(100, 30)
+        )
+        self.sheetname.Enable(False)
+        wx.StaticText(panel, label=u''.join([
+            u'Load all worksheets with the\n',
+            u'same config for xls/xlsx input file:'
+        ]), pos=(third_blk-150, layer_depth-5))
+        self.loadallsheets = wx.CheckBox(panel, pos=(third_blk+20, layer_depth))
+        self.loadallsheets.SetValue(False)
+        layer_depth += layer_diff        
 
         # Inputs to the directory to save the plots
         text = wx.StaticText(
