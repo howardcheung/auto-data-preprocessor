@@ -170,7 +170,9 @@ class MainGUI(wx.Frame):
         ]), pos=(third_blk-150, layer_depth-5))
         self.loadallsheets = wx.CheckBox(panel, pos=(third_blk+20, layer_depth))
         self.loadallsheets.SetValue(False)
-        layer_depth += layer_diff        
+        if 'xls' not in get_ext(self.dfpath.GetValue()):
+            self.loadallsheets.Enable(False)
+        layer_depth += layer_diff     
 
         # Inputs to the directory to save the plots
         text = wx.StaticText(
@@ -470,8 +472,9 @@ class MainGUI(wx.Frame):
 
         # load worksheet name choices for files with xls/ xlsx extension
         # for self.sheetname ComboBox
-        ext = split(filepath)[1].split('.')[-1]
+        ext = get_ext(filepath)
         if ext == 'xls' or ext == 'xlsx':
+            self.loadallsheets.Enable(True)
             if not self.loadallsheets.GetValue():
                 self.sheetname.Enable(True)
             with ExcelFile(filepath) as xlsx:
@@ -479,6 +482,8 @@ class MainGUI(wx.Frame):
                 self.sheetname.SetItems(sheetnames)
                 self.sheetname.SetValue(sheetnames[0])
         else:
+            self.loadallsheets.Enable(False)
+            self.loadallsheets.SetValue(False)  # reset loading all worksheets
             self.sheetname.Enable(False)
 
     def SaveOpen(self, evt):
@@ -757,6 +762,19 @@ def gui_main():
     app = wx.App()
     MainGUI(None, title=u'Data Preprocessing Helper')
     app.MainLoop()
+
+
+def get_ext(filepath: str) -> str:
+    """
+        Return the extension of a file given a file path
+
+        Inputs:
+        ==========
+        filepath: str
+            string character for a filepath
+    """
+
+    return split(filepath)[1].split('.')[-1]
 
 
 # run the method for the GUI
