@@ -126,6 +126,9 @@ class MainGUI(wx.Frame):
             panel, value=u'../dat/time_of_change.csv',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        self.dfpath.Bind(wx.EVT_TEXT, self.ChangeForXlsFile)
         button = wx.Button(
             panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
@@ -172,6 +175,7 @@ class MainGUI(wx.Frame):
         self.loadallsheets.SetValue(False)
         if 'xls' not in get_ext(self.dfpath.GetValue()):
             self.loadallsheets.Enable(False)
+        # check if anything needs to be changed after checking/unchecking the box
         self.loadallsheets.Bind(wx.EVT_CHECKBOX, self.LoadAllSheets)
         layer_depth += layer_diff     
 
@@ -473,15 +477,27 @@ class MainGUI(wx.Frame):
 
         # load worksheet name choices for files with xls/ xlsx extension
         # for self.sheetname ComboBox
+        self.ChangeForXlsFile(evt)
+
+    def ChangeForXlsFile(self, evt):
+        """
+            Change options if the input file is an excel file
+        """
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        filepath = self.dfpath.GetValue()
         ext = get_ext(filepath)
         if ext == 'xls' or ext == 'xlsx':
             self.loadallsheets.Enable(True)
             if not self.loadallsheets.GetValue():
                 self.sheetname.Enable(True)
-            with ExcelFile(filepath) as xlsx:
-                sheetnames = xlsx.sheet_names
-                self.sheetname.SetItems(sheetnames)
-                self.sheetname.SetValue(sheetnames[0])
+            try:  # the file may not exist
+                with ExcelFile(filepath) as xlsx:
+                    sheetnames = xlsx.sheet_names
+                    self.sheetname.SetItems(sheetnames)
+                    self.sheetname.SetValue(sheetnames[0])
+            except FileNotFoundError:
+                pass
         else:
             self.loadallsheets.Enable(False)
             self.loadallsheets.SetValue(False)  # reset loading all worksheets
