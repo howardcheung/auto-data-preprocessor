@@ -25,11 +25,15 @@ If you want, you can also assume the values to be interpolated values
 - add tab to choose results depending on time range and weekday ranges
 - write the user manual
 
-# Diretories
+# Diretories and files
+* `changelog`: directory that stores changelog of the software for different versions
 * `dat`: directory that stores testing data
 * `doc`: directory that stores the user manual
-* `src`: directory that stores the source python script files
+* `exe`: directory that stores instructions on how to compile the binary
 * `licenses`: directory that contains licenses of the modules
+* `src`: directory that stores the source python script files
+* `LICENSE_BINARY`: license file for the software
+* `README.md`: file of Markdown script for this readme
 
 # Licenses
 
