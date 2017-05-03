@@ -200,15 +200,13 @@ def convert_df(datadf: DataFrame, start_time: datetime=None,
         elif output_file.split('.')[-1] == 'xlsx':
             # need to open and close files if engine is not 'xlsxWriter'
             with ExcelWriter(
-                    output_file, engine='xlsxwriter',
-                    datetime_format=output_timestring
+                    output_file, engine='xlsxwriter'
                     ) as writer:
                 final_df.to_excel(writer)
                 writer.save()
         elif output_file.split('.')[-1] == 'xls':
             with ExcelWriter(
-                    output_file, engine='xlwt',
-                    datetime_format=output_timestring
+                    output_file, engine='xlwt'
                     ) as writer:
                 final_df.to_excel(writer)
                 writer.save()

@@ -4,3 +4,4 @@ Change log from v0.2.2-alpha to v0.2.3-alpha
 - Load csv files with separator ";" or tabs correctly
 - Fill columns with invalid data only by blanks and show warnings during the process
 - Can autodetect starting time from file
+- Remove opening file error for xls/xlsx files dur to time string format
