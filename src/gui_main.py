@@ -211,14 +211,16 @@ class MainGUI(wx.Frame):
         layer_depth += layer_diff
 
         # Inputs to the format time string
-        text = wx.StaticText(panel, label=u''.join([
-            u'Format of time string \nin the output file:'
+        text = wx.StaticText(panel, label=u'\n'.join([
+            u'Format of time string', u'in the output file',
+            u'(invalid for xls/xlsx file output):'
         ]), pos=(first_blk, layer_depth+2))
         # # require additional object for textbox
         self.outputtimestring = wx.TextCtrl(
             panel, value=u'%Y/%m/%d %H:%M:%S',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
+        self.outputtimestring.Enable(get_ext(self.dfpath.GetValue()) == 'csv')
         # a button for instructions
         button = wx.Button(
             panel,
@@ -229,8 +231,9 @@ class MainGUI(wx.Frame):
         layer_depth += (layer_diff+20)
 
         # Inputs to the format time string
-        text = wx.StaticText(panel, label=u''.join([
-            u'Format of time string \nin the first column\n of the input file:'
+        text = wx.StaticText(panel, label=u'\n'.join([
+            u'Format of time string in the first',
+            u'column of the input file:'
         ]), pos=(first_blk, layer_depth+2))
         # require additional object for textbox
         self.timestring = wx.TextCtrl(
@@ -489,6 +492,7 @@ class MainGUI(wx.Frame):
         ext = get_ext(filepath)
         if ext == 'xls' or ext == 'xlsx':
             self.loadallsheets.Enable(True)
+            self.outputtimestring.Enable(False)
             if not self.loadallsheets.GetValue():
                 self.sheetname.Enable(True)
             try:  # the file may not exist
@@ -502,6 +506,7 @@ class MainGUI(wx.Frame):
             self.loadallsheets.Enable(False)
             self.loadallsheets.SetValue(False)  # reset loading all worksheets
             self.sheetname.Enable(False)
+            self.outputtimestring.Enable(True)
 
     def LoadAllSheets(self, evt):
         """
