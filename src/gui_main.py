@@ -12,12 +12,14 @@
 from calendar import monthrange
 from datetime import datetime
 from math import isnan
+from ntpath import split
 from os.path import isfile, dirname
 from pathlib import Path
 from traceback import format_exc
 from webbrowser import open as webbrowseropen
 
 # import third party modules
+from pandas import ExcelFile
 import wx
 from wx import adv
 
@@ -74,7 +76,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(700, 700)
+            parent, title=title, size=(720, 750)
         )  # size of the application window
 
         self.initui()
@@ -124,6 +126,9 @@ class MainGUI(wx.Frame):
             panel, value=u'../dat/time_of_change.csv',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        self.dfpath.Bind(wx.EVT_TEXT, self.ChangeForXlsFile)
         button = wx.Button(
             panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
@@ -151,6 +156,28 @@ class MainGUI(wx.Frame):
         # add the dynamic information of the checkbox
         self.header.Bind(wx.EVT_CHECKBOX, self.HeaderInput)
         layer_depth += layer_diff
+
+        # option to select sheet, if any, and choose if all sheets
+        # should be loaded
+        wx.StaticText(panel, label=u''.join([
+            u'Choose a worksheet to load\n',
+            u'for xls/xlsx input file:'
+        ]), pos=(first_blk, layer_depth-5))
+        self.sheetname = wx.ComboBox(
+            panel, pos=(sec_blk, layer_depth), size=(100, 30)
+        )
+        self.sheetname.Enable(False)
+        wx.StaticText(panel, label=u''.join([
+            u'Load all worksheets with the\n',
+            u'same config for xls/xlsx input file:'
+        ]), pos=(third_blk-150, layer_depth-5))
+        self.loadallsheets = wx.CheckBox(panel, pos=(third_blk+20, layer_depth))
+        self.loadallsheets.SetValue(False)
+        if 'xls' not in get_ext(self.dfpath.GetValue()):
+            self.loadallsheets.Enable(False)
+        # check if anything needs to be changed after checking/unchecking the box
+        self.loadallsheets.Bind(wx.EVT_CHECKBOX, self.LoadAllSheets)
+        layer_depth += layer_diff     
 
         # Inputs to the directory to save the plots
         text = wx.StaticText(
@@ -184,14 +211,16 @@ class MainGUI(wx.Frame):
         layer_depth += layer_diff
 
         # Inputs to the format time string
-        text = wx.StaticText(panel, label=u''.join([
-            u'Format of time string \nin the output file:'
+        text = wx.StaticText(panel, label=u'\n'.join([
+            u'Format of time string', u'in the output file',
+            u'(invalid for xls/xlsx file output):'
         ]), pos=(first_blk, layer_depth+2))
         # # require additional object for textbox
         self.outputtimestring = wx.TextCtrl(
             panel, value=u'%Y/%m/%d %H:%M:%S',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
+        self.outputtimestring.Enable(get_ext(self.dfpath.GetValue()) == 'csv')
         # a button for instructions
         button = wx.Button(
             panel,
@@ -202,8 +231,9 @@ class MainGUI(wx.Frame):
         layer_depth += (layer_diff+20)
 
         # Inputs to the format time string
-        text = wx.StaticText(panel, label=u''.join([
-            u'Format of time string \nin the first column\n of the input file:'
+        text = wx.StaticText(panel, label=u'\n'.join([
+            u'Format of time string in the first',
+            u'column of the input file:'
         ]), pos=(first_blk, layer_depth+2))
         # require additional object for textbox
         self.timestring = wx.TextCtrl(
@@ -443,9 +473,50 @@ class MainGUI(wx.Frame):
         filepath = openFileDialog.GetPath()
         self.dfpath.SetValue(filepath)
 
+        # check if file exists
         if not isfile(filepath):
             wx.LogError('Cannot open file "%s".' % openFileDialog.GetPath())
             return False
+
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        self.ChangeForXlsFile(evt)
+
+    def ChangeForXlsFile(self, evt):
+        """
+            Change options if the input file is an excel file
+        """
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        filepath = self.dfpath.GetValue()
+        ext = get_ext(filepath)
+        if ext == 'xls' or ext == 'xlsx':
+            self.loadallsheets.Enable(True)
+            self.outputtimestring.Enable(False)
+            if not self.loadallsheets.GetValue():
+                self.sheetname.Enable(True)
+            try:  # the file may not exist
+                with ExcelFile(filepath) as xlsx:
+                    sheetnames = xlsx.sheet_names
+                    self.sheetname.SetItems(sheetnames)
+                    self.sheetname.SetValue(sheetnames[0])
+            except FileNotFoundError:
+                pass
+        else:
+            self.loadallsheets.Enable(False)
+            self.loadallsheets.SetValue(False)  # reset loading all worksheets
+            self.sheetname.Enable(False)
+            self.outputtimestring.Enable(True)
+
+    def LoadAllSheets(self, evt):
+        """
+            To disable the selection of the sheets based on the selection
+            of the option of loadallsheet
+        """
+        if self.loadallsheets.GetValue():
+            self.sheetname.Enable(False)
+        else:
+            self.sheetname.Enable(True)
 
     def SaveOpen(self, evt):
         """
@@ -573,6 +644,16 @@ class MainGUI(wx.Frame):
             box.Fit()
             box.ShowModal()
             return
+        # check file type
+        ext = get_ext(self.newdfpath.GetValue())
+        if ext != 'csv' and ext != 'xls' or ext != 'xlsx':
+            box = wx.MessageDialog(
+                self, u'Output file type not supported!', u'Error',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            box.Fit()
+            box.ShowModal()
+            return
         # check the time
         start_time = datetime(
             int(self.start_yr.GetValue()), int(self.start_mon.GetValue()),
@@ -595,23 +676,48 @@ class MainGUI(wx.Frame):
         # output any error to a message box if needed
         try:
             header_exist = self.header.GetValue()
-            datadf = read_data(
+            datadfs = read_data(
                 self.dfpath.GetValue(),
                 header=(self.header_no.GetValue() if header_exist else None),
-                time_format=self.timestring.GetValue()
+                time_format=self.timestring.GetValue(),
+                sheetnames=(
+                    [] if self.loadallsheets.GetValue() else (
+                        None
+                        if get_ext(self.dfpath.GetValue()) == 'csv'
+                        else [self.sheetname.GetValue()]
+                    )
+                )
             )
+            # return error if load all sheet option is selected for csv file
+            # output
+            if get_ext(self.newdfpath.GetValue()) == 'csv' and \
+                    self.loadallsheets.GetValue() and \
+                    len(datadfs) > 1:
+                wx.MessageBox(
+                    u'\n'.join([
+                        u'Cannot output multiple worksheets to a csv file!',
+                        u'Please output it as a xls or xlsx file!'
+                    ]), u'Error',
+                    wx.OK | wx.ICON_INFORMATION
+                )
+                return
             # show warning for columns that contain no valid data
-            for col in datadf.columns:
-                if all([isnan(x) for x in datadf.loc[:, col]]):
-                    dlg = MessageDlg(''.join([
-                            'Column ', col,
-                            ' does not contain any valid values.',
-                            ' Closing in 2s......'
-                        ]), u'Warning')        
-                    wx.CallLater(2000, dlg.Destroy)
-                    dlg.ShowModal()
+            for sheet_name in datadfs:
+                datadf = datadfs[sheet_name]
+                for col in datadf.columns:
+                    if all([
+                        isinstance(x, str) or isnan(x)
+                        for x in datadf.loc[:, col]
+                    ]):
+                        dlg = MessageDlg(''.join([
+                                'Column ', col, ' in ', sheet_name, 
+                                ' does not contain any valid values.',
+                                ' Closing in 2s......'
+                            ]), u'Warning')        
+                        wx.CallLater(2000, dlg.Destroy)
+                        dlg.ShowModal()
             convert_df(
-               datadf, (None if self.use_starttime.GetValue() else start_time),
+               datadfs, (None if self.use_starttime.GetValue() else start_time),
                (None if self.no_endtime.GetValue() else end_time),
                interval=int(self.time_int.GetValue())*60,
                step=(True if self.func_choice.GetSelection() == 0 else False),
@@ -718,6 +824,19 @@ def gui_main():
     app = wx.App()
     MainGUI(None, title=u'Data Preprocessing Helper')
     app.MainLoop()
+
+
+def get_ext(filepath: str) -> str:
+    """
+        Return the extension of a file given a file path
+
+        Inputs:
+        ==========
+        filepath: str
+            string character for a filepath
+    """
+
+    return split(filepath)[1].split('.')[-1]
 
 
 # run the method for the GUI

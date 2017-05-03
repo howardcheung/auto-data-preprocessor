@@ -11,6 +11,7 @@
 # import python internal libraries
 from datetime import datetime
 from math import isnan
+from ntpath import split
 
 # import third party libraries
 # from numpy import where
@@ -23,13 +24,17 @@ from pandas.tslib import Timestamp
 # write functions
 def read_data(filename: str, header: int=None,
               time_format: str='%m/%d/%y %I:%M:%S %p CST',
-              interpolation: bool=False, duration: bool=False) -> DataFrame:
+              sheetnames: list=None,
+              interpolation: bool=False, duration: bool=False) -> dict:
     """
         This function reads the data in filename that is in specified format
         and returns a pandas dataframe with time data as the index and
         'CLG' as the header of the cooling load data. The final dataframe
         contains 'CLG' as the cooling load data column and 'Duration' as the
-        duration of each data point in seconds.
+        duration of each data point in seconds. Since the file may be an xls
+        file that contains multiple worksheets, the final returned result
+        is a python dict object with key values being the sheet names and dict
+        values being the dataframes.
 
         Inputs:
         ==========
@@ -46,6 +51,11 @@ def read_data(filename: str, header: int=None,
             Please check https://docs.python.org/3.5/library/datetime.html#strftime-and-strptime-behavior
             for details
 
+        sheetnames: list
+            list of string for the name of worksheets to be imported. Default
+            None which means that only the first sheet will be imported.
+            If [] is given, all sheets will be read.
+
         interpolation: bool
             if the code should conduct an interpolation for values that are
             NaN in the sheet. Default False
@@ -59,15 +69,49 @@ def read_data(filename: str, header: int=None,
     # initialize the dataframe
     ext = filename.split('.')[-1]
 
+    # preprocess pddf time string
+    def _time_config(pddf):
+        """
+            Preprocess the time string in a pandas DataFrame and returns
+            a pandas DataFrame
+        """
+
+        # rename the first column name
+        pddf.columns = ['Time']+pddf.columns.tolist()[1:]
+
+        # make time column as the index
+        try:
+            pddf.loc[:, 'Time'] = [
+                datetime.strptime(timestr, time_format)
+                for timestr in pddf.loc[:, 'Time']
+            ]
+        except TypeError:  # the time string has been converted by pandas
+            pass
+        pddf.set_index('Time', inplace=True)
+
+        return pddf
+
     # read the file. Read the file as two columns first to conduct
     # preprocessing before
+    pddfs = {}
     if ext == 'xlsx' or ext == 'xls':
         with ExcelFile(filename) as xlsx:
-            for sheet_name in xlsx.sheet_names:
-                pddf = read_excel(
-                    xlsx, sheet_name, header=header
-                )
-                break
+            if sheetnames is None:
+                for sheet_name in xlsx.sheet_names:
+                    pddfs[sheet_name] = _time_config(read_excel(
+                        xlsx, sheet_name, header=header
+                    ))
+                    break  # read first sheet
+            elif sheetnames == []:  # empty list implies all sheets
+                for sheet_name in xlsx.sheet_names:
+                    pddfs[sheet_name] = _time_config(read_excel(
+                        xlsx, sheet_name, header=header
+                    ))
+            else:
+                for sheet_name in sheetnames:
+                    pddfs[sheet_name] = _time_config(read_excel(
+                        xlsx, sheet_name, header=header
+                    ))  # read the specified sheets
     elif ext == 'csv':
         pddf = read_csv(filename, header=header)
         if pddf.shape[1] == 1:
@@ -76,24 +120,13 @@ def read_data(filename: str, header: int=None,
         if pddf.shape[1] == 1:
             # one column only including the index. The separator is wrong.
             pddf = read_csv(filename, header=header, sep='\t')
+        # use the name of the file as the worksheet name
+        pddfs[split(filename)[-1].split('.')[0]] = _time_config(pddf)
     else:
         raise ValueError(''.join([
             'The file extension of the data file cannot be recognized by ',
             'data_read.read_data(). Exiting.......'
         ]))
-
-    # rename the first column name
-    pddf.columns = ['Time']+pddf.columns.tolist()[1:]
-
-    # make time column as the index
-    try:
-        pddf.loc[:, 'Time'] = [
-            datetime.strptime(timestr, time_format)
-            for timestr in pddf.loc[:, 'Time']
-        ]
-    except TypeError:  # the time string has been converted by pandas
-        pass
-    pddf.set_index('Time', inplace=True)
 
     # not using numpy for license issue
     # # preprocessing by interpolating invalid columns
@@ -108,7 +141,7 @@ def read_data(filename: str, header: int=None,
             # for ind, timeind in enumerate(pddf[pddf.columns[0]].index)
         # ]
 
-    return pddf
+    return pddfs
 
 
 def interpolate_with_s(mid_date: datetime, a_date: datetime, b_date: datetime,
@@ -240,29 +273,40 @@ if __name__ == '__main__':
 
     from os.path import basename
 
+    # testing file reading with multiple worksheets
+    FILENAME = '../dat/missing_data.xlsx'
+    print('Testing file import by using ', FILENAME)
+    TEST_DFS = read_data(FILENAME, header=0, sheetnames=['Sheet1', 'Sheet2'])
+    assert TEST_DFS['Sheet1'].columns.tolist()[0] == 'Pressure'
+    assert TEST_DFS['Sheet2'].columns.tolist()[0] == 'Cost'
+
+    TEST_DFS = read_data(FILENAME, header=0, sheetnames=[])
+    assert TEST_DFS['Sheet3'].columns.tolist()[0] == 'Price'
+
+    # testing import with dates
     FILENAME = '../dat/date.csv'
     print('Testing file import by using ', FILENAME)
     TEST_DF = read_data(
         FILENAME, header=0, time_format='%Y-%m-%d'
     )
-    assert isinstance(TEST_DF.index[0], Timestamp)
+    assert isinstance(TEST_DF['date'].index[0], Timestamp)
 
     FILENAME = '../dat/missing_data.xls'
     print('Testing file import by using ', FILENAME)
-    TEST_DF = read_data(FILENAME, header=1, duration=True,
+    TEST_DF = read_data(FILENAME, header=0, duration=True,
                         interpolation=True)
-    assert isinstance(TEST_DF.index[0], Timestamp)
+    assert isinstance(TEST_DF['Sheet1'].index[0], Timestamp)
     # assert TEST_DF.loc[TEST_DF.index[0], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
 
     for FILENAME in [
         '../dat/time_of_change-semicolon.csv',
-        '../dat/time_of_change-tab.csv',
         '../dat/time_of_change.csv'
     ]:
         print('Testing file import by using ', FILENAME)
-        TEST_DF = read_data(FILENAME, header=0)
+        SHTNAME = split(FILENAME)[-1].split('.')[0]
+        TEST_DF = read_data(FILENAME, header=0)[SHTNAME]
         assert isinstance(TEST_DF.index[0], Timestamp)
         assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
         assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
@@ -273,7 +317,8 @@ if __name__ == '__main__':
     # test for multi-header
     FILENAME = '../dat/time_of_change_multiheader.csv'
     print('Testing file import by using ', FILENAME)
-    TEST_DF = read_data(FILENAME, header=1)
+    SHTNAME = split(FILENAME)[-1].split('.')[0]
+    TEST_DF = read_data(FILENAME, header=1)[SHTNAME]
     assert isinstance(TEST_DF.index[0], Timestamp)
     assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
     assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
