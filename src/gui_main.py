@@ -660,7 +660,7 @@ class MainGUI(wx.Frame):
             return
         # check file type
         ext = get_ext(self.newdfpath.GetValue())
-        if ext != 'csv' and ext != 'xls' or ext != 'xlsx':
+        if not (ext == 'csv' or ext == 'xls' or ext == 'xlsx'):
             box = wx.MessageDialog(
                 self, u'Output file type not supported!', u'Error',
                 wx.OK | wx.ICON_INFORMATION
