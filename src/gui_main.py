@@ -648,8 +648,28 @@ class MainGUI(wx.Frame):
             datadfs = read_data(
                 self.dfpath.GetValue(),
                 header=(self.header_no.GetValue() if header_exist else None),
-                time_format=self.timestring.GetValue()
+                time_format=self.timestring.GetValue(),
+                sheetnames=(
+                    [] if self.loadallsheets.GetValue() else (
+                        None
+                        if get_ext(self.dfpath.GetValue()) == 'csv'
+                        else self.sheetname.GetValue()
+                    )
+                )
             )
+            # return error if load all sheet option is selected for csv file
+            # output
+            if get_ext(self.newdfpath.GetValue()) == 'csv' and \
+                    self.loadallsheets.GetValue() and \
+                    len(datadfs) > 1:
+                wx.MessageBox(
+                    u'\n'.join([
+                        u'Cannot output multiple worksheets to a csv file!',
+                        u'Please output it as a xls or xlsx file!'
+                    ]), u'Error',
+                    wx.OK | wx.ICON_INFORMATION
+                )
+                return
             # show warning for columns that contain no valid data
             for sheet_name in datadfs:
                 datadf = datadfs[sheet_name]
