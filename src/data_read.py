@@ -70,6 +70,12 @@ def read_data(filename: str, header: int=None,
                 break
     elif ext == 'csv':
         pddf = read_csv(filename, header=header)
+        if pddf.shape[1] == 1:
+            # one column only including the index. The separator is wrong.
+            pddf = read_csv(filename, header=header, sep=';')
+        if pddf.shape[1] == 1:
+            # one column only including the index. The separator is wrong.
+            pddf = read_csv(filename, header=header, sep='\t')
     else:
         raise ValueError(''.join([
             'The file extension of the data file cannot be recognized by ',
@@ -80,10 +86,13 @@ def read_data(filename: str, header: int=None,
     pddf.columns = ['Time']+pddf.columns.tolist()[1:]
 
     # make time column as the index
-    pddf.loc[:, 'Time'] = [
-        datetime.strptime(timestr, time_format)
-        for timestr in pddf.loc[:, 'Time']
-    ]
+    try:
+        pddf.loc[:, 'Time'] = [
+            datetime.strptime(timestr, time_format)
+            for timestr in pddf.loc[:, 'Time']
+        ]
+    except TypeError:  # the time string has been converted by pandas
+        pass
     pddf.set_index('Time', inplace=True)
 
     # not using numpy for license issue
@@ -231,24 +240,35 @@ if __name__ == '__main__':
 
     from os.path import basename
 
-    # FILENAME = 'missing_data.xls'
-    # print('Testing file import by using ', FILENAME)
-    # TEST_DF = read_data(FILENAME, header=None, duration=True,
-                        # interpolation=True)
-    # assert isinstance(TEST_DF.index[0], Timestamp)
+    FILENAME = '../dat/date.csv'
+    print('Testing file import by using ', FILENAME)
+    TEST_DF = read_data(
+        FILENAME, header=0, time_format='%Y-%m-%d'
+    )
+    assert isinstance(TEST_DF.index[0], Timestamp)
+
+    FILENAME = '../dat/missing_data.xls'
+    print('Testing file import by using ', FILENAME)
+    TEST_DF = read_data(FILENAME, header=1, duration=True,
+                        interpolation=True)
+    assert isinstance(TEST_DF.index[0], Timestamp)
     # assert TEST_DF.loc[TEST_DF.index[0], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
 
-    FILENAME = '../dat/time_of_change.csv'
-    print('Testing file import by using ', FILENAME)
-    TEST_DF = read_data(FILENAME, header=0)
-    assert isinstance(TEST_DF.index[0], Timestamp)
-    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
-    assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
-    assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
-    assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
-    assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
+    for FILENAME in [
+        '../dat/time_of_change-semicolon.csv',
+        '../dat/time_of_change-tab.csv',
+        '../dat/time_of_change.csv'
+    ]:
+        print('Testing file import by using ', FILENAME)
+        TEST_DF = read_data(FILENAME, header=0)
+        assert isinstance(TEST_DF.index[0], Timestamp)
+        assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
+        assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
+        assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
+        assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
+        assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
 
     # test for multi-header
     FILENAME = '../dat/time_of_change_multiheader.csv'

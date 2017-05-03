@@ -11,6 +11,7 @@
 # import python internal modules
 from calendar import monthrange
 from datetime import datetime
+from math import isnan
 from os.path import isfile, dirname
 from pathlib import Path
 from traceback import format_exc
@@ -54,6 +55,7 @@ For licenses of modules involved in the development of the software,
 please visit <https://github.com/howardcheung/data-preprocessing-helper/>
 """
 
+
 class MainGUI(wx.Frame):
     """
         Class to hold the object for the main window of the application
@@ -72,7 +74,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(625, 650)
+            parent, title=title, size=(700, 700)
         )  # size of the application window
 
         self.initui()
@@ -100,8 +102,8 @@ class MainGUI(wx.Frame):
         begin_depth = 20
         layer_diff = 40
         first_blk = 20
-        sec_blk = 200
-        third_blk = 475
+        sec_blk = 250
+        third_blk = 525
 
         # title
         # position: (from top to bottom, from left to right)
@@ -223,7 +225,7 @@ class MainGUI(wx.Frame):
         # create spin control for the date and time
         self.start_yr = wx.SpinCtrl(
             panel, value='2017', min=1, max=4000,
-            pos=(sec_blk, layer_depth), size=(50, 20)
+            pos=(sec_blk, layer_depth), size=(55, 20)
         )
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
@@ -272,6 +274,12 @@ class MainGUI(wx.Frame):
         text = wx.StaticText(panel, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
+        self.use_starttime = wx.CheckBox(panel, pos=(sec_blk+70*5, layer_depth+2))
+        self.use_starttime.SetValue(True)
+        wx.StaticText(
+            panel, label=u'Use file\nstarting time',
+            pos=(sec_blk+70*5, layer_depth+20)
+        )
         layer_depth += (layer_diff+20)
 
         # add ending time input
@@ -283,7 +291,7 @@ class MainGUI(wx.Frame):
         # create spin control for the date and time
         self.end_yr = wx.SpinCtrl(
             panel, value='2017', min=1, max=4000,
-            pos=(sec_blk, layer_depth), size=(50, 20)
+            pos=(sec_blk, layer_depth), size=(55, 20)
         )
         text = wx.StaticText(panel, label=u''.join([
             u'Year'
@@ -391,7 +399,7 @@ class MainGUI(wx.Frame):
 
         # buttons at the bottom
         button_ok = wx.Button(
-            panel, label=u'Preprocess', pos=(500, layer_depth)
+            panel, label=u'Preprocess', pos=(third_blk+50, layer_depth)
         )
         button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
         layer_depth += layer_diff
@@ -534,7 +542,7 @@ class MainGUI(wx.Frame):
 
         info = adv.AboutDialogInfo()
         info.SetName('Data Preprocessing Helper')
-        info.SetVersion('0.2.1')
+        info.SetVersion('0.2.3')
         info.SetDescription(DESCRIPTION)
         info.SetCopyright('(C) Copyright 2017 Howard Cheung')
         info.SetWebSite(
@@ -592,27 +600,114 @@ class MainGUI(wx.Frame):
                 header=(self.header_no.GetValue() if header_exist else None),
                 time_format=self.timestring.GetValue()
             )
+            # show warning for columns that contain no valid data
+            for col in datadf.columns:
+                if all([isnan(x) for x in datadf.loc[:, col]]):
+                    dlg = MessageDlg(''.join([
+                            'Column ', col,
+                            ' does not contain any valid values.',
+                            ' Closing in 2s......'
+                        ]), u'Warning')        
+                    wx.CallLater(2000, dlg.Destroy)
+                    dlg.ShowModal()
             convert_df(
-               datadf, start_time,
+               datadf, (None if self.use_starttime.GetValue() else start_time),
                (None if self.no_endtime.GetValue() else end_time),
                interval=int(self.time_int.GetValue())*60,
-               step=(True if self.func_choice.GetSelection()==0 else False),
+               step=(True if self.func_choice.GetSelection() == 0 else False),
                ini_val=self.early_pts.GetSelection()+1,
                output_file=self.newdfpath.GetValue(),
                sep=self.output_sep.GetValue(),
                output_timestring=self.outputtimestring.GetValue()
             )
         except BaseException:
-            box = wx.MessageDialog(
-                self, format_exc(), u'Error', wx.OK | wx.ICON_INFORMATION
-            )
-            box.Fit()
-            box.ShowModal()
+            # box = wx.MessageDialog(
+                # self, format_exc(), u'Error', wx.OK | wx.ICON_INFORMATION
+            # )
+            chgdep = ErrorReportingDialog(None)
+            chgdep.ShowModal()
+            chgdep.Destroy()
             return
 
         # function to be called upon finishing processing
         wx.CallLater(0, self.ShowMessage)
         evt.Skip()
+
+
+class MessageDlg(wx.Dialog):
+    """
+        Function for auto-closing message diaglog
+        from https://stackoverflow.com/questions/6012380/wxmessagebox-with-an-auto-close-timer-in-wxpython
+    """
+    def __init__(self, message, title):
+        """
+            Initailizing a new dialog box that can be closed automatically
+        """
+        wx.Dialog.__init__(self, None, -1, title, size=(400, 120))
+        self.CenterOnScreen(wx.BOTH)
+
+        ok = wx.Button(self, wx.ID_OK, "OK")
+        ok.SetDefault()
+        text = wx.StaticText(self, -1, message)
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        vbox.Add(text, 1, wx.ALIGN_CENTER | wx.TOP, 10)
+        vbox.Add(ok, 1, wx.ALIGN_CENTER | wx.BOTTOM, 10)
+        self.SetSizer(vbox)
+
+
+class ErrorReportingDialog(wx.Dialog):
+    """
+        Error Diaglog box
+        from http://zetcode.com/wxpython/dialogs/
+    """
+
+    def __init__(self, *args, **kw):
+        """
+            Initializing the dialog box
+        """
+        super(ErrorReportingDialog, self).__init__(*args, **kw)
+
+        self.InitUI()
+        self.SetSize((500, 400))
+        self.SetTitle(u'Error')
+
+    def InitUI(self):
+        """
+            Interface of the error dialog box
+        """
+
+        pnl = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        sb = wx.StaticBox(pnl, label=u''.join([
+            u'Process failed. Please report your situation with the following error messages:'
+        ]))
+        sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)
+        sbs.Add(wx.TextCtrl(
+            pnl, value=format_exc(), size=(475, 400),
+            style=wx.TE_READONLY | wx.TE_MULTILINE
+        ))
+
+        pnl.SetSizer(sbs)
+
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        closeButton = wx.Button(self, label='Close')
+        hbox2.Add(closeButton, flag=wx.LEFT, border=5)
+
+        vbox.Add(pnl, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+        vbox.Add(hbox2, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+
+        self.SetSizer(vbox)
+
+        closeButton.Bind(wx.EVT_BUTTON, self.OnClose)
+
+    def OnClose(self, e):
+        """
+            Close the error dialog box
+        """
+
+        self.Destroy()
 
 
 # define functions
