@@ -172,6 +172,7 @@ class MainGUI(wx.Frame):
         self.loadallsheets.SetValue(False)
         if 'xls' not in get_ext(self.dfpath.GetValue()):
             self.loadallsheets.Enable(False)
+        self.loadallsheets.Bind(wx.EVT_CHECKBOX, self.LoadAllSheets)
         layer_depth += layer_diff     
 
         # Inputs to the directory to save the plots
@@ -485,6 +486,16 @@ class MainGUI(wx.Frame):
             self.loadallsheets.Enable(False)
             self.loadallsheets.SetValue(False)  # reset loading all worksheets
             self.sheetname.Enable(False)
+
+    def LoadAllSheets(self, evt):
+        """
+            To disable the selection of the sheets based on the selection
+            of the option of loadallsheet
+        """
+        if self.loadallsheets.GetValue():
+            self.sheetname.Enable(False)
+        else:
+            self.sheetname.Enable(True)
 
     def SaveOpen(self, evt):
         """
