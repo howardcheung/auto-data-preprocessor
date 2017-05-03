@@ -644,6 +644,16 @@ class MainGUI(wx.Frame):
             box.Fit()
             box.ShowModal()
             return
+        # check file type
+        ext = get_ext(self.newdfpath.GetValue())
+        if ext != 'csv' and ext != 'xls' or ext != 'xlsx':
+            box = wx.MessageDialog(
+                self, u'Output file type not supported!', u'Error',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            box.Fit()
+            box.ShowModal()
+            return
         # check the time
         start_time = datetime(
             int(self.start_yr.GetValue()), int(self.start_mon.GetValue()),
