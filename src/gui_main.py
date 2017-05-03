@@ -189,6 +189,7 @@ class MainGUI(wx.Frame):
             panel, value=u'./example.csv',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
+        self.newdfpath.Bind(wx.EVT_TEXT, self.ChangeForXlsFileOutput)
         button = wx.Button(
             panel, label=u'Browse...', pos=(third_blk, layer_depth)
         )
@@ -492,7 +493,6 @@ class MainGUI(wx.Frame):
         ext = get_ext(filepath)
         if ext == 'xls' or ext == 'xlsx':
             self.loadallsheets.Enable(True)
-            self.outputtimestring.Enable(False)
             if not self.loadallsheets.GetValue():
                 self.sheetname.Enable(True)
             try:  # the file may not exist
@@ -506,7 +506,6 @@ class MainGUI(wx.Frame):
             self.loadallsheets.Enable(False)
             self.loadallsheets.SetValue(False)  # reset loading all worksheets
             self.sheetname.Enable(False)
-            self.outputtimestring.Enable(True)
 
     def LoadAllSheets(self, evt):
         """
@@ -542,6 +541,21 @@ class MainGUI(wx.Frame):
         # this can be done with e.g. wxPython input streams:
         filepath = openFileDialog.GetPath()
         self.newdfpath.SetValue(filepath)
+
+        # change GUI as needed
+        self.ChangeForXlsFileOutput(evt)
+
+    def ChangeForXlsFileOutput(self, evt):
+        """
+            Change options if the output file is an excel file
+        """
+        filepath = self.newdfpath.GetValue()
+        ext = get_ext(filepath)
+        if ext == 'xls' or ext == 'xlsx':
+            # no longer need output time string setting
+            self.outputtimestring.Enable(False)
+        else:
+            self.outputtimestring.Enable(True)
 
     def TimeInstruct(self, evt):
         """
@@ -613,7 +627,7 @@ class MainGUI(wx.Frame):
 
         info = adv.AboutDialogInfo()
         info.SetName('Data Preprocessing Helper')
-        info.SetVersion('0.2.3')
+        info.SetVersion('0.3.0')
         info.SetDescription(DESCRIPTION)
         info.SetCopyright('(C) Copyright 2017 Howard Cheung')
         info.SetWebSite(
