@@ -239,6 +239,7 @@ class MainGUI(wx.Frame):
             'None', 'seconds', 'minutes', 'hours', 'days'
         ], pos=(sec_blk, layer_depth), size=(70, 20))
         self.numtimeoutput.SetEditable(False)
+        self.numtimeoutput.Bind(wx.EVT_COMBOBOX, self.ChangeOptionForNum)
         wx.StaticText(panel, label=u'\n'.join([
             u'from the user-defined start time',
         ]), pos=(sec_blk+80, layer_depth+2))
@@ -568,7 +569,17 @@ class MainGUI(wx.Frame):
             # no longer need output time string setting
             self.outputtimestring.Enable(False)
         else:
-            self.outputtimestring.Enable(True)
+            if self.numtimeoutput.GetValue() == 'None':
+                self.outputtimestring.Enable(True)
+
+    def ChangeOptionForNum(self, evt):
+        """
+            Change options for number values
+        """
+        if self.numtimeoutput.GetValue() != 'None':
+            self.outputtimestring.Enable(False)
+        else:
+            self.ChangeForXlsFileOutput(evt)
 
     def TimeInstruct(self, evt):
         """
