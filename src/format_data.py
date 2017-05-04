@@ -27,7 +27,8 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                end_time: datetime=None, interval: float=600,
                step: bool=True, ini_val: int=1,
                output_file: str=None, sep: str=';',
-               output_timestring: str='%Y/%m/%d %H:%M:%S') -> dict:
+               output_timestring: str='%Y/%m/%d %H:%M:%S',
+               outputtimevalue: str='None') -> dict:
     """
         This function converts a dataframe which data are converted according
         to time of change of values to data collected at fixed intervals.
@@ -74,6 +75,10 @@ def convert_df(datadfs: dict, start_time: datetime=None,
 
         output_timestring: str
             format time string in the output file. Default '%Y-%m-%d %H:%M:%S'
+
+        outputtimevalue: str
+            format time string into values from the user-defined start time.
+            Default 'None'. Can be 'seconds', 'minutes', 'hours' and 'days'
     """
 
     final_dfs = {}
@@ -195,6 +200,23 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                                 )
                         newind += 1
 
+        # change time format as needed
+        if outputtimevalue != 'None':
+            coltime = ''.join(['TimeValue from ', str(final_df.index[0])])
+            final_df.loc[:, coltime] = (
+                final_df.index-final_df.index[0]
+            ).total_seconds()
+            if outputtimevalue == 'minutes':
+                final_df.loc[:, coltime] = \
+                    final_df.loc[:, coltime]/60.0
+            elif outputtimevalue == 'hours':
+                final_df.loc[:, coltime] = \
+                    final_df.loc[:, coltime]/3600.0
+            elif outputtimevalue == 'days':
+                final_df.loc[:, coltime] = \
+                    final_df.loc[:, coltime]/3600.0/24.0
+            final_df.set_index(coltime, inplace=True)
+
         final_dfs[sheet_name] = final_df
 
     # output new file
@@ -278,6 +300,21 @@ if __name__ == '__main__':
     from data_read import read_data
 
     from pandas import read_csv, read_excel, Timestamp, ExcelFile
+
+    # check time output
+    # check function for computer-generated ending time
+    FILENAME = '../dat/time_of_change.csv'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 0, 0), outputtimevalue='seconds'
+    )
+    assert isinstance(NEW_DFS['time_of_change'].index[0], float)
+    FILENAME = '../dat/missing_data.xlsx'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 0, 0), outputtimevalue='days'
+    )
+    assert isinstance(NEW_DFS['Sheet1'].index[0], float)
 
     # test the writing of multiple sheets
     FILENAME = '../dat/missing_data.xlsx'
