@@ -762,7 +762,8 @@ class MainGUI(wx.Frame):
                ini_val=self.early_pts.GetSelection()+1,
                output_file=self.newdfpath.GetValue(),
                sep=self.output_sep.GetValue(),
-               output_timestring=self.outputtimestring.GetValue()
+               output_timestring=self.outputtimestring.GetValue(),
+               outputtimevalue=self.numtimeoutput.GetValue()
             )
         except BaseException:
             # box = wx.MessageDialog(
