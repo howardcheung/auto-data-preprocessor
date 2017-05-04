@@ -76,7 +76,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(720, 750)
+            parent, title=title, size=(720, 770)
         )  # size of the application window
 
         self.initui()
@@ -230,6 +230,20 @@ class MainGUI(wx.Frame):
         )
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
         layer_depth += (layer_diff+20)
+
+        # other output format
+        wx.StaticText(panel, label=u'\n'.join([
+            u'or output the time as values of ',
+        ]), pos=(first_blk, layer_depth+2))
+        self.numtimeoutput = wx.ComboBox(panel, value='None', choices=[
+            'None', 'seconds', 'minutes', 'hours', 'days'
+        ], pos=(sec_blk, layer_depth), size=(70, 20))
+        self.numtimeoutput.SetEditable(False)
+        self.numtimeoutput.Bind(wx.EVT_COMBOBOX, self.ChangeOptionForNum)
+        wx.StaticText(panel, label=u'\n'.join([
+            u'from the user-defined start time',
+        ]), pos=(sec_blk+80, layer_depth+2))
+        layer_depth += (layer_diff)
 
         # Inputs to the format time string
         text = wx.StaticText(panel, label=u'\n'.join([
@@ -555,7 +569,17 @@ class MainGUI(wx.Frame):
             # no longer need output time string setting
             self.outputtimestring.Enable(False)
         else:
-            self.outputtimestring.Enable(True)
+            if self.numtimeoutput.GetValue() == 'None':
+                self.outputtimestring.Enable(True)
+
+    def ChangeOptionForNum(self, evt):
+        """
+            Change options for number values
+        """
+        if self.numtimeoutput.GetValue() != 'None':
+            self.outputtimestring.Enable(False)
+        else:
+            self.ChangeForXlsFileOutput(evt)
 
     def TimeInstruct(self, evt):
         """
@@ -738,7 +762,8 @@ class MainGUI(wx.Frame):
                ini_val=self.early_pts.GetSelection()+1,
                output_file=self.newdfpath.GetValue(),
                sep=self.output_sep.GetValue(),
-               output_timestring=self.outputtimestring.GetValue()
+               output_timestring=self.outputtimestring.GetValue(),
+               outputtimevalue=self.numtimeoutput.GetValue()
             )
         except BaseException:
             # box = wx.MessageDialog(
