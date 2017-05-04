@@ -76,7 +76,7 @@ class MainGUI(wx.Frame):
                 title of the window
         """
         super(MainGUI, self).__init__(
-            parent, title=title, size=(720, 750)
+            parent, title=title, size=(720, 770)
         )  # size of the application window
 
         self.initui()
@@ -230,6 +230,19 @@ class MainGUI(wx.Frame):
         )
         button.Bind(wx.EVT_BUTTON, self.TimeInstruct)
         layer_depth += (layer_diff+20)
+
+        # other output format
+        wx.StaticText(panel, label=u'\n'.join([
+            u'or output the time as values of ',
+        ]), pos=(first_blk, layer_depth+2))
+        self.numtimeoutput = wx.ComboBox(panel, value='None', choices=[
+            'None', 'seconds', 'minutes', 'hours', 'days'
+        ], pos=(sec_blk, layer_depth), size=(70, 20))
+        self.numtimeoutput.SetEditable(False)
+        wx.StaticText(panel, label=u'\n'.join([
+            u'from the user-defined start time',
+        ]), pos=(sec_blk+80, layer_depth+2))
+        layer_depth += (layer_diff)
 
         # Inputs to the format time string
         text = wx.StaticText(panel, label=u'\n'.join([
