@@ -110,7 +110,7 @@ class MainGUI(wx.Frame):
         # title
         # position: (from top to bottom, from left to right)
         wx.StaticText(panel, label=u''.join([
-            u'Time-of-change value data to data',
+            u'Time-of-change value data to data ',
             u'at constant time intervals'
         ]), pos=(first_blk, begin_depth))
 
@@ -171,7 +171,7 @@ class MainGUI(wx.Frame):
             u'Load all worksheets with the\n',
             u'same config for xls/xlsx input file:'
         ]), pos=(third_blk-150, layer_depth-5))
-        self.loadallsheets = wx.CheckBox(panel, pos=(third_blk+20, layer_depth))
+        self.loadallsheets = wx.CheckBox(panel, pos=(third_blk+55, layer_depth))
         self.loadallsheets.SetValue(False)
         if 'xls' not in get_ext(self.dfpath.GetValue()):
             self.loadallsheets.Enable(False)
