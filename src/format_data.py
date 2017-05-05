@@ -231,15 +231,25 @@ def convert_df(datadfs: dict, start_time: datetime=None,
             with ExcelWriter(
                     output_file, engine='xlsxwriter'
                     ) as writer:
-                for sheet_name in final_dfs:
-                    final_dfs[sheet_name].to_excel(writer, sheet_name)
+                for ind, sheet_name in enumerate(final_dfs):
+                    if len(sheet_name) < 30:
+                        final_dfs[sheet_name].to_excel(writer, sheet_name)
+                    else:  # limit to excel worksheet name
+                        final_dfs[sheet_name].to_excel(writer, ''.join([
+                            sheet_name[0:27], '(', '%02i' % (ind+1), ')'
+                        ]))
                 writer.save()
         elif output_file.split('.')[-1] == 'xls':
             with ExcelWriter(
                     output_file, engine='xlwt'
                     ) as writer:
                 for sheet_name in final_dfs:
-                    final_dfs[sheet_name].to_excel(writer, sheet_name)
+                    if len(sheet_name) < 30:
+                        final_dfs[sheet_name].to_excel(writer, sheet_name)
+                    else:  # limit to excel worksheet name
+                        final_dfs[sheet_name].to_excel(writer, ''.join([
+                            sheet_name[0:27], '(', '%02i' % (ind+1), ')'
+                        ]))
                 writer.save()
         else:
             raise ValueError('Wrong extension for output file')
@@ -300,6 +310,13 @@ if __name__ == '__main__':
     from data_read import read_data
 
     from pandas import read_csv, read_excel, Timestamp, ExcelFile
+
+    # check super long name file output
+    FILENAME = \
+        '../dat/time_of_change-long-name-file-0123456789001234567890.csv'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(TEST_DFS, output_file='./testresult.xlsx')
+    remove('./testresult.xlsx')   
 
     # check time output
     # check function for computer-generated ending time
