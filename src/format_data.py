@@ -311,6 +311,17 @@ if __name__ == '__main__':
 
     from pandas import read_csv, read_excel, Timestamp, ExcelFile
 
+    # check for interpolation for consecutive invalid values
+    FILENAME = '../dat/missing_data.xls'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(TEST_DFS, step=False)
+    assert NEW_DFS['Sheet1'].loc[
+        datetime(2017, 1, 1, 11, 10), 'Pressure'
+    ] == 2
+    assert NEW_DFS['Sheet1'].loc[
+        datetime(2017, 1, 1, 11, 20), 'Pressure'
+    ] == 3
+
     # check super long name file output
     FILENAME = \
         '../dat/time_of_change-long-name-file-0123456789001234567890.csv'
@@ -474,9 +485,6 @@ if __name__ == '__main__':
         NEW_DF.loc[datetime(2017, 1, 1, 12, 0), 'Pressure'], float
     )
     assert NEW_DF.loc[datetime(2017, 1, 1, 22, 0), 'Pressure'] != 0.0
-    assert NEW_DF.loc[datetime(2017, 1, 1, 11, 10), 'Pressure'] > \
-        8.227828 and NEW_DF.loc[datetime(2017, 1, 1, 11, 10), 'Pressure'] < \
-        8.227829
     assert NEW_DF.loc[datetime(2017, 1, 1, 12, 0), 'Pressure'] == (
         TEST_DFS['Sheet1'].loc[datetime(2017, 1, 1, 11, 50), 'Pressure'] +
         TEST_DFS['Sheet1'].loc[datetime(2017, 1, 1, 12, 10), 'Pressure']
