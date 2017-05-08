@@ -107,6 +107,14 @@ def convert_df(datadfs: dict, start_time: datetime=None,
         # is the smallest for all possible values
         ini_val_pos = []  # locations of the good initial values
         for col in final_df.columns:
+            # if the whole column is nan, skip the loop immediately
+            if all([
+                    isinstance(ent, str) or isnan(ent)
+                    for ent in datadf.loc[:, col]
+                    ]):
+                final_df.loc[:, col] = float('nan')
+                ini_val_pos.append(final_df.shape[0])
+                continue  # next loop
             # find the appearance of the first value
             # initialize the position for data that contain no good values
             pos = datadf.index[-1]
@@ -297,12 +305,12 @@ def interpolate_with_s(mid_date: datetime, a_date: datetime, b_date: datetime,
             value b
     """
     # use total seconds for large diff
-    result = (bval-aval)*(mid_date-a_date).total_seconds() /\
-        (b_date-a_date).total_seconds()+aval
-    if isnan(result):
-        return 0.0
-    else:
-        return result
+    try:
+        result = (bval-aval)*(mid_date-a_date).total_seconds() /\
+            (b_date-a_date).total_seconds()+aval
+    except TypeError:
+        return float('nan')
+    return result
 
 # testing functions
 if __name__ == '__main__':
@@ -323,6 +331,12 @@ if __name__ == '__main__':
     assert NEW_DFS['Sheet1'].loc[
         datetime(2017, 1, 1, 11, 20), 'Pressure'
     ] == 3
+    assert isnan(NEW_DFS['Sheet1'].loc[
+        datetime(2017, 1, 1, 11, 20), 'Cost'
+    ])
+    assert isnan(NEW_DFS['Sheet1'].loc[
+        datetime(2017, 1, 1, 11, 20), 'Price'
+    ])
 
     # check super long name file output
     FILENAME = \
