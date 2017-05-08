@@ -305,12 +305,12 @@ def interpolate_with_s(mid_date: datetime, a_date: datetime, b_date: datetime,
             value b
     """
     # use total seconds for large diff
-    result = (bval-aval)*(mid_date-a_date).total_seconds() /\
-        (b_date-a_date).total_seconds()+aval
-    if isnan(result):
-        return 0.0
-    else:
-        return result
+    try:
+        result = (bval-aval)*(mid_date-a_date).total_seconds() /\
+            (b_date-a_date).total_seconds()+aval
+    except TypeError:
+        return float('nan')
+    return result
 
 # testing functions
 if __name__ == '__main__':
