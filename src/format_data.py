@@ -111,7 +111,9 @@ def convert_df(datadfs: dict, start_time: datetime=None,
             # initialize the position for data that contain no good values
             pos = datadf.index[-1]
             for ind_oldind, oldind in enumerate(datadf.index):
-                if not isnan(datadf.loc[oldind, col]):
+                if not isinstance(
+                        datadf.loc[oldind, col], str
+                        ) and not isnan(datadf.loc[oldind, col]):
                     pos = oldind
                     ini_val_pos.append(ind_oldind)
                     break
