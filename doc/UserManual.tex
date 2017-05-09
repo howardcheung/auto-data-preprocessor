@@ -7,7 +7,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \author{Howard Cheung \\ email: howard.at (at) gmail.com }
-\title{User manual for the Data Preprocessing Helper Version 0.2.1}
+\title{User manual for the Data Preprocessing Helper Version 0.3.2}
 \begin{document}
 
 \maketitle
@@ -16,7 +16,7 @@
 
 This tool is made to assist data analysts who are unfamiliar with coding languages to preprocess their time-series data.
 In a lot of engineering systems, data from different subsystems are obtained differently.
-While some of them are obtained at different fixed time intervals, some of them, such as on/off signals, are obtained according to time-of-value-change.
+While some of them are obtained at different fixed time intervals, some of them, such as on/off signals, are obtained at times when the signal changes.
 Some other data contain invalid or missing data points that results in invalid calculation.
 The resultant data are very difficult for laymen who only use spreadsheet software to analyze their data.
 This project aims at helping these analysts to preprocess their data by converting the time-of-value-change data to data collected at fixed time intervals.
