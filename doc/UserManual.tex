@@ -32,7 +32,8 @@ For users using other operating systems, they can build the executable using the
 \subsection{Data}
 The data file should be in the format of either a csv file (comma-separated file), an xls file (Microsoft Excel 1997-2003 file) or an xlsx file (Microsoft Excel Open XML Format file). Their detailed requirements are discussed below.
 
-\subsubsection{CSV File}
+\subsubsection{csv file}
+\label{sec:csv-file}
 csv files are files which data are stored with ',' or ';' as delimiters. For data in csv format to work with the Data Preproessing Helper, its data must be structured as follows.
 
 \begin{enumerate}
@@ -49,6 +50,27 @@ An example of the data file is shown in Figure \ref{fig:csv_file}.
 \caption{Example csv file that can be processed by Data Preprocessing Helper}
 \label{fig:csv_file}
 \end{figure}
+
+\subsection{xls and xlsx files}
+xls and xlsx files are used as spreadsheet files, and the requirements for them to be preprocessed by the Data Preprocessing Helper are the same. For each worksheet inside the files, the data must be aligned to follow these requirements:
+
+\begin{enumerate}
+\item The first column of data must be data with date and time. It can contain date only if the data are acquired at day intervals.
+\item It can contain multiple rows above the data, but only the first row above the data will be considered as the header.
+\end{enumerate}
+
+If the user would like to preprocess multiple worksheets in a file simultaneously, the format of data in each worksheet must be the same.
+For example, the format of the time string in the first columns in all worksheets in a file must be the same, and the number of rows above the first row of data must be the same as well.
+An example is given in Figure \ref{fig:xls_file}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{xls-file.png}
+\caption{Example xls file with two worksheets that can be processed by Data Preprocessing Helper}
+\label{fig:xls_file}
+\end{figure}
+
+
 
 \section{Tutorial}
 
