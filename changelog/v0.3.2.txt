@@ -3,3 +3,4 @@ Change log from v0.3.1-alpha to v0.3.2-alpha
 - Typo and formatting issues on GUI
 - Fix an issue with string characters in the algorithm that finds the first valid values
 - Improve speed and error handling
+- Improve documentation by explaining all input files and adding one more tutorial
