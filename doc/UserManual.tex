@@ -222,6 +222,93 @@ and the preprocessing result will create a time column with numeric values of mi
 \label{fig:minute_data}
 \end{figure}
 
+\section{Detailed input description}
+This section gives details for each input in the graphical user interface in Figure \ref{fig:ui}.
+
+\subsection{Data file path}
+A user can enter the path to the file where the data should be preprocessed by the data preprocessing helper.
+He or she can either enter the path manually in the box next to it, or use the "Browse" button to select the file requiring the preprocessing.
+
+\subsection{Existence of a header row}
+A user can specify if the data file contains a header row.
+If the box is checked, the row in the data file will be considered as the header of the data table and will be output as the header in the output file.
+If it is not checked, the first row of the file will be considered as the first row of the data file and the output file will be output with a default header row.
+
+\subsection{Number of rows to be skipped above the header row}
+Sometimes a data file may contain other information above the table of data.
+If that's the case, specify the number of rows of redundant information in the data file in this box.
+These rows will be ignored in the preprocessing.
+
+\subsection{Choose a worksheet to load in xls/xlsx file}
+If the data file to be processed is a xls/xlsx file, a user can choose the worksheet to be preprocessed in this drop down list.
+
+\subsection{Load all worksheets with the same config for xls/xlsx file}
+If all worksheets contain data that are formatted in the same manner (e.g. same format of time string in the first column, same number of rows above header, etc.), a user can preprocess the data in all worksheets simultaneously by checking this box.
+Please notice that the output file must be an xls/xlsx file for the preprocessing to be successful.
+
+\subsection{Path to save file}
+A user can specify the directory and the name of the file to be saved.
+They can either enter the path manually or use the "Browse" button to specify the location.
+
+\subsection{Separator of the output file}
+A user can choose the separator of the columns in the output file with two options: "," and ";".
+
+\subsection{Format of time string in the output file}
+\label{subsec:format_time_output}
+A user can specify the format of the string in the output file here if the output file is in csv format.
+The specification method can be found in paragraphs right below Figure \ref{fig:ui_zoomed}.
+For xls/xlsx output files, the time data will be formatted following the Date/Time format in Microsoft Excel file.
+
+If the user does not want to use any string or Microsoft Excel Date/Time format in the output file, they can specify the time column to be output as numerical time values since the start time of the output file.
+This is done by specifying the option in the drop down list below the input field "Format of time string in the output file", and the choice of the output format includes "seconds", "minutes", "hours" and "days".
+
+\subsection{Format of time string in the first column of output file}
+A user should specify the format of the time column in the data file in this input field. The specification method is same as the one in Section \ref{subsec:format_time_output}.
+Please notice that users can leave it to default values if the time column data in the original file is stored in Microsoft Date/Time format.
+
+\subsection{Start time in the new data file}
+A user can specify the start time in the new data file.
+If the start time is earlier than the earliest time specified in the data file, a user can choose the assumption to predict the values of the data points before the earliest time in the input data as described in Section \ref{subsec:early_dat}.
+Otherwise, the value at the start time will be calculated following the assumption of the relationship between data files as described in Section \ref{subsec:assume_bet_dat}.
+
+\subsection{Use file start time}
+If this checkbox is checked, the data preprocessing helper will use the time on the first row of the data as the start time in the output file.
+The input in the input field "Start time in the new data file" will be ignored.
+
+\subsection{Ending time in the new data file}
+A user can specify the ending time in the output data file.
+If the ending time is later than the last entry in the input data file, the assumption in Section \ref{subsec:assume_bet_dat} will be used to predict the values of the data at the end of the output file.
+
+\subsection{New time interval}
+A user can specify the time intervals between data points in the output file in minutes.
+Please note that the input must be an integer.
+
+\subsection{Assumption between data points}
+\label{subsec:assume_bet_dat}
+A user can choose the assumption of the values between the data points in the input file.
+They can be either
+
+\begin{itemize}
+\item Step function
+\item Continuous variable (inter- and extrapolation)
+\end{itemize}
+
+This helps to predict the values for data in the new output file which corresponding time has no record in the input data file.
+Please note that the extrapolation and interpolation uses linear interpolation method.
+
+\subsection{Assumptions for data points earlier than the existing data}
+\label{subsec:early_dat}
+A user assumes the values of data in the output data file which the corresponding time is earlier than the earliest time in the input data file. They can be either
+
+\begin{itemize}
+\item Use the minimum value in the trend
+\item Use the first value in the trend
+\end{itemize}
+
+.
+For the first option "Use the minimum value in the trend", the data preprocessing helper finds the minimum values of the data in each column in the input data file, and assumes that all data occur before the input file time period are maintained at these minimum values.
+For the second option " Use the first value in the trend", the data preprocessing helper uses the first valid value in each column of the input file to predict the values of the data points earlier than the input file.
+
 \section{Inquiries}
 
 If you encounter bugs about the tool, please send an email to me at howard.at (at) gmail.com or post an issue at \href{https://github.com/howardcheung/data-preprocessing-helper/}{the GitHub repository}.
