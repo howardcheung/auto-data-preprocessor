@@ -20,6 +20,7 @@ This tool is made to assist data analysts who are unfamiliar with coding languag
 In a lot of engineering systems, data from different subsystems are obtained differently.
 While some of them are obtained at different fixed time intervals, some of them, such as on/off signals, are obtained at times when the signal changes.
 Some other data contain invalid or missing data points that results in invalid calculation.
+Some users may like numerical values over time string characters for their calculation.
 The resultant data are very difficult for laymen who only use spreadsheet software to analyze their data.
 This project aims at helping these analysts to preprocess their data by converting the time-of-value-change data to data collected at fixed time intervals.
 
@@ -156,6 +157,7 @@ While they are available for you to explore in this version of tool, their docum
 Details of the functions will be discussed in documentation in future versions.
 
 \subsection{Filling in invalid data points in a data file collected at fixed time interval}
+\label{sec:tutorial_invalid}
 
 This tutorial demonstrates how to use the tool to fill in invalid data points collected at fixed time interval.
 To start the tutorial, we can consider the \emph{missing\_data.xls} file as shown in Figure \ref{fig:missing_data}.
@@ -201,6 +203,23 @@ The output file should have the invalid and missing data points filled while oth
 \includegraphics[width=0.6\textwidth]{missing_data_result.png}
 \caption{Resultant data file after interpolation}
 \label{fig:missing_data_result}
+\end{figure}
+
+\subsection{Using numerical values instead of string in the first time column}
+Sometimes a user may want to use numerical values like hours or minutes instead of strings in the first column of time data.
+This software also allows a user to convert the time column into numerical values as well.
+Using the same example file in Section \ref{sec:tutorial_invalid}, a user simply need to change one option as follows:
+\begin{itemize}
+\item output the time as values of: minutes
+\end{itemize}
+
+and the preprocessing result will create a time column with numeric values of minutes from the start time of the file as shown in Figure \ref{fig:minute_data}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{missing_data_result_minute.png}
+\caption{Resultant data file after interpolation with time column shown in minutes after the start time of the file}
+\label{fig:minute_data}
 \end{figure}
 
 \section{Inquiries}
