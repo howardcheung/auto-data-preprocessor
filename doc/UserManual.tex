@@ -72,8 +72,6 @@ An example is given in Figure \ref{fig:xls_file}.
 \label{fig:xls_file}
 \end{figure}
 
-
-
 \section{Tutorial}
 
 \subsection{Conversion of time-of-value-change data to data at fixed time interval}
@@ -180,10 +178,16 @@ To do so, we open the graphical use interface and choose the followings.
 \begin{itemize}
 \item Data file path: click "Browse..." to choose the file \emph{MissingData.xls}
 \item Existence of a header row: checked
+\item Number of rows to be skipped above the header row: 0
+\item Choose a worksheet to load for xls/xlsx file: Sheet1
+\item Load all worksheets with the same config for xls/xlsx input file: Unchecked
 \item Path to save file: click "Browse..." and choose the directory and file name which you want to save the output file
 \item Format of the time string in the output file: \%Y/\%m/\%d \%H:\%M:\%S (default)
+\item output the time as values of: None
 \item Format of time string in the first column of the input file: \%m/\%d/\%y \%I:\%M:\%S \%p CST
-\item Start time in the new data file: 2017/01/01 11:00 (the starting time of the file in Figure \ref{fig:missing_data}
+\item Start time in the new data file: Remain unchanged
+\item Use file starting time: checked
+\item Ending time in the new data file: Remain unchanged
 \item Autogen ending time: checked
 \item New time interval: 10 minutes (same as that of the file)
 \item Assumption between data points: Continuous variable (inter- and extrapolation)
