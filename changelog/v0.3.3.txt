@@ -1,0 +1,4 @@
+Change log from v0.3.2 to v0.3.3
+=======================================================
+- Debug to filter data based on the given time span only and ignore the rest of the data in the dataframe
+- Debug to give correct beginning values when step function assumption and intermediate starting time is used
