@@ -113,18 +113,22 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                     for ent in datadf.loc[start_time:end_time, col]
                     ]):
                 final_df.loc[:, col] = float('nan')
-                ini_val_pos.append(final_df.shape[0])
+                ini_val_pos.append(datadf.shape[0])
                 continue  # next loop
             # find the appearance of the first value
             # initialize the position for data that contain no good values
+            # should be the index right before the start time of the new
+            # dataframe
             pos = datadf.index[-1]
-            for ind_oldind, oldind in enumerate(datadf.index):
-                if not isinstance(
-                        datadf.loc[oldind, col], str
-                        ) and not isnan(datadf.loc[oldind, col]):
+            for ind_oldind, oldind in enumerate(datadf.index[:-1]):
+                if not isinstance(datadf.loc[oldind, col], str) and \
+                        not isnan(datadf.loc[oldind, col]) and \
+                        datadf.index[ind_oldind+1] > final_df.index[0]:
                     pos = oldind
                     ini_val_pos.append(ind_oldind)
                     break
+            if pos == datadf.index[-1]:
+                ini_val_pos.append(datadf.shape[0]-1)
             if final_df.index[0] >= pos or ini_val == 2:
                 final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
             else:
@@ -138,30 +142,37 @@ def convert_df(datadfs: dict, start_time: datetime=None,
 
         if step:  # assume step function
             # continue to append new columns until the end
-            oldind = 0
-            newind = 1
-            oldlen = datadf.shape[0]
-            newlen = final_df.shape[0]
-            while newind < newlen:
-                if final_df.index[newind] < datadf.index[oldind]:
-                    final_df.loc[final_df.index[newind], :] = \
-                        final_df.loc[final_df.index[newind-1], :]
-                else:
-                    for col in final_df.columns:
-                        # if the whole column is nan value, skip the col
-                        if all([isnan(ent) for ent in final_df.loc[:, col]]):
-                            continue # skip column
+            for col, ini in zip(final_df.columns, ini_val_pos):
+                # if the whole column is nan value, skip the col
+                if all([
+                        isinstance(ent, str) or isnan(ent)
+                        for ent in datadf.loc[start_time:end_time, col]
+                        ]):
+                    continue # skip column
+                oldind = ini
+                newind = 1
+                oldlen = datadf.shape[0]
+                newlen = final_df.shape[0]
+                while newind < newlen:
+                    if final_df.index[newind] < datadf.index[oldind]:
+                        # use the previous value
+                        final_df.loc[final_df.index[newind], col] = \
+                            final_df.loc[final_df.index[newind-1], col]
+                    else:
+                        # find a new value
                         if isinstance(
                                 datadf.loc[datadf.index[oldind], col], str
-                                ) or isnan(datadf.loc[datadf.index[oldind], col]):
+                                ) or isnan(
+                                    datadf.loc[datadf.index[oldind], col]
+                                ):
                             final_df.loc[final_df.index[newind], col] = \
                                 final_df.loc[final_df.index[newind-1], col]
                         else:
                             final_df.loc[final_df.index[newind], col] = \
                                 datadf.loc[datadf.index[oldind], col]
-                    if oldind < oldlen-1:
-                        oldind += 1
-                newind += 1
+                        if oldind < oldlen-1:
+                            oldind += 1
+                    newind += 1
         else:  # run interpolation
             # continue to append new columns until the end
             newlen = final_df.shape[0]
@@ -330,21 +341,20 @@ if __name__ == '__main__':
     FILENAME = '../dat/time_of_change.csv'
     TEST_DFS = read_data(FILENAME, header=0)
     NEW_DFS = convert_df(
-        TEST_DFS, datetime(2017, 1, 2, 0, 0), datetime(2017, 1, 3, 11, 50)
+        TEST_DFS, datetime(2017, 1, 2, 0, 0), datetime(2017, 1, 3, 0, 0)
     )
     assert isnan(
         NEW_DFS['time_of_change'].loc[datetime(2017, 1, 2, 9, 30), 'Item 1']
     )
-    # assert NEW_DFS['time_of_change'].loc[
-        # datetime(2017, 1, 2, 9, 30), 'Item 3'
-    # ] == 1
-    # assert NEW_DFS['time_of_change'].loc[
-        # datetime(2017, 1, 2, 1, 0), 'Item 3'
-    # ] == 0
-    # assert NEW_DFS['time_of_change'].loc[
-        # datetime(2017, 1, 2, 6, 0), 'Item 4'
-    # ] == 0
-    
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 2, 10, 40), 'Item 3'
+    ] == 1
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 2, 1, 0), 'Item 3'
+    ] == 0
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 2, 6, 0), 'Item 4'
+    ] == 1
 
     # check for interpolation for consecutive invalid values
     FILENAME = '../dat/missing_data.xls'
