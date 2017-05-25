@@ -90,16 +90,17 @@ def convert_df(datadfs: dict, start_time: datetime=None,
         # calculate the ending index for the new dataframe
         num = 1
         if end_time is None:
-            while start_time+timedelta(seconds=interval*num) < datadf.index[-1]:
+            while start_time+timedelta(seconds=interval*num) < \
+                    datadf.index[-1]:
                 num += 1
         else:
-            while start_time+timedelta(seconds=interval*num) <= end_time:
+            while start_time+timedelta(seconds=interval*num) < end_time:
                 num += 1
-        end_time = start_time+timedelta(seconds=interval*(num-1))
+        end_time = start_time+timedelta(seconds=interval*num)
 
         # create the new dataframe with the correct indexes and column names
         final_df = DataFrame(index=[
-            start_time+timedelta(seconds=interval*ind) for ind in range(num)
+            start_time+timedelta(seconds=interval*ind) for ind in range(num+1)
         ], columns=datadf.columns)
 
         # calculate the starting values for the new dataframe
@@ -110,7 +111,9 @@ def convert_df(datadfs: dict, start_time: datetime=None,
             # if the whole column is nan, skip the loop immediately
             if all([
                     isinstance(ent, str) or isnan(ent)
-                    for ent in datadf.loc[start_time:end_time, col]
+                    for ent in datadf.loc[
+                        start_time:end_time+timedelta(0, 0, 1), col
+                    ]  # include the one at end_time
                     ]):
                 final_df.loc[:, col] = float('nan')
                 ini_val_pos.append(datadf.shape[0])
@@ -135,8 +138,9 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                 # use to_numeric to push all non-numeric data to NaN values
                 try:
                     final_df.loc[final_df.index[0], col] = to_numeric(
-                        datadf[col][start_time:end_time], errors='coerce'
-                    ).dropna().unique().min()
+                        datadf[col][start_time:end_time+timedelta(0, 0, 1)],
+                        errors='coerce'
+                    ).dropna().unique().min()  # include the one at end_time
                 except ValueError:  # no valid values
                     final_df.loc[:, col] = float('nan')
 
@@ -146,7 +150,9 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                 # if the whole column is nan value, skip the col
                 if all([
                         isinstance(ent, str) or isnan(ent)
-                        for ent in datadf.loc[start_time:end_time, col]
+                        for ent in datadf.loc[
+                            start_time:end_time+timedelta(0, 0, 1), col
+                        ]  # include the one at end_time
                         ]):
                     continue # skip column
                 oldind = ini
@@ -337,6 +343,29 @@ if __name__ == '__main__':
 
     from pandas import read_csv, read_excel, Timestamp, ExcelFile
 
+    # check for assuming nan values for data before the first valid value
+    # FILENAME = '../dat/time_of_change.csv'
+    # TEST_DFS = read_data(FILENAME, header=0)
+    # NEW_DFS = convert_df(
+        # TEST_DFS, datetime(2017, 1, 2, 0, 0), ini_val=1
+    # )
+    # import pdb; pdb.set_trace()
+    # assert isnan(
+        # NEW_DFS['time_of_change'].loc[datetime(2017, 1, 2, 9, 30), 'Item 1']
+    # )
+
+    # check the end time
+    FILENAME = '../dat/time_of_change.csv'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 2, 0, 0), ini_val=1
+    )
+    assert NEW_DFS['time_of_change'].index[-1] == datetime(2017, 1, 7, 22, 30)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 2, 0, 0), datetime(2017, 1, 2, 10, 0)
+    )
+    assert NEW_DFS['time_of_change'].index[-1] == datetime(2017, 1, 2, 10, 0)
+
     # check for formatting with intermediate beginning time step
     FILENAME = '../dat/time_of_change.csv'
     TEST_DFS = read_data(FILENAME, header=0)
@@ -441,10 +470,10 @@ if __name__ == '__main__':
     TEST_DFS = read_data(FILENAME, header=0)
     NEW_DFS = convert_df(TEST_DFS, datetime(2017, 1, 1, 0, 0))
     assert isinstance(NEW_DFS['time_of_change'], DataFrame)
-    assert NEW_DFS['time_of_change'].index[-1] <= \
-        TEST_DFS['time_of_change'].index[-1]
     assert NEW_DFS['time_of_change'].index[-1] >= \
-        TEST_DFS['time_of_change'].index[-2]
+        TEST_DFS['time_of_change'].index[-1]
+    assert NEW_DFS['time_of_change'].index[-2] <= \
+        TEST_DFS['time_of_change'].index[-1]
 
     # check function for new ending time
     NEW_DFS = convert_df(
