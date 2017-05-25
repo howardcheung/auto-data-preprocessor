@@ -131,7 +131,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                 # use to_numeric to push all non-numeric data to NaN values
                 try:
                     final_df.loc[final_df.index[0], col] = to_numeric(
-                        datadf[col], errors='coerce'
+                        datadf[col][start_time:end_time], errors='coerce'
                     ).dropna().unique().min()
                 except ValueError:  # no valid values
                     final_df.loc[:, col] = float('nan')
@@ -148,6 +148,9 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                         final_df.loc[final_df.index[newind-1], :]
                 else:
                     for col in final_df.columns:
+                        # if the whole column is nan value, skip the col
+                        if all([isnan(ent) for ent in final_df.loc[:, col]]):
+                            continue # skip column
                         if isinstance(
                                 datadf.loc[datadf.index[oldind], col], str
                                 ) or isnan(datadf.loc[datadf.index[oldind], col]):
@@ -180,7 +183,9 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                     try:
                         while isinstance(
                                 datadf.loc[datadf.index[oldind], col], str
-                                ) or isnan(datadf.loc[datadf.index[oldind], col]):
+                                ) or isnan(
+                                    datadf.loc[datadf.index[oldind], col]
+                                ):
                             oldind += 1
                     except IndexError:  # out of frame. Use the old value
                         oldind = oldoldind
@@ -320,6 +325,26 @@ if __name__ == '__main__':
     from data_read import read_data
 
     from pandas import read_csv, read_excel, Timestamp, ExcelFile
+
+    # check for formatting with intermediate beginning time step
+    FILENAME = '../dat/time_of_change.csv'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 2, 0, 0), datetime(2017, 1, 3, 11, 50)
+    )
+    assert isnan(
+        NEW_DFS['time_of_change'].loc[datetime(2017, 1, 2, 9, 30), 'Item 1']
+    )
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 2, 9, 30), 'Item 3'
+    ] == 1
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 2, 1, 0), 'Item 3'
+    ] == 0
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 2, 6, 0), 'Item 4'
+    ] == 0
+    
 
     # check for interpolation for consecutive invalid values
     FILENAME = '../dat/missing_data.xls'
