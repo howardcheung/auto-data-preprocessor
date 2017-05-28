@@ -64,6 +64,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
             is before the occurrence of the initial value in the column.
                 1: Use the minimum value in the trend
                 2: Use the first value in the trend
+                3: Fill in float('nan') (blank) values
             Default 1
 
         output_file: str
@@ -108,6 +109,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
         # is the smallest for all possible values
         ini_val_pos = []  # locations of the initial good values
         sec_val_pos = []  # locations of the second good values
+        final_df_inis = []  # location of initial value in new dataframe
         for col in final_df.columns:
             # # if the whole column is nan, skip the loop immediately
             # if all([
@@ -147,23 +149,32 @@ def convert_df(datadfs: dict, start_time: datetime=None,
             if num_gd_value <= 1:
                 sec_val_pos.append(datadf.shape[0]-1)
             # assign first value
+            final_df_ini = 0
+            # shift the final_df initial index if nan values are needed
+            if ini_val == 3:
+                while final_df_ini < final_df.shape[0]-1 and \
+                        final_df.index[final_df_ini] < pos:
+                    final_df.loc[final_df.index[final_df_ini], col] = \
+                        float('nan')
+                    final_df_ini += 1
             if pos > final_df.index[-1] or num_gd_value == 0:
                 # if the first good value appears after the ending time
                 # or there are no good values in the trend
                 final_df.loc[:, col] = float('nan')
-            elif final_df.index[0] >= pos or ini_val == 2:
+            elif final_df.index[final_df_ini] >= pos or ini_val == 2:
                 # if the first value in the new frame may be the same as that
                 # of the old one
-                if final_df.index[0] == pos or step or (
-                        ini_val == 2 and final_df.index[0] < pos
+                if final_df.index[final_df_ini] == pos or step or (
+                        ini_val == 2 and final_df.index[final_df_ini] < pos
                         ):
                     # when the first value in the column equals to the first
                     # available value
-                    final_df.loc[final_df.index[0], col] = datadf.loc[pos, col]
+                    final_df.loc[final_df.index[final_df_ini], col] = \
+                        datadf.loc[pos, col]
                 else:  # need interpolation
-                    final_df.loc[final_df.index[0], col] = \
+                    final_df.loc[final_df.index[final_df_ini], col] = \
                         interpolate_with_s(
-                            final_df.index[0], pos, sec_pos,
+                            final_df.index[final_df_ini], pos, sec_pos,
                             datadf.loc[pos, col], datadf.loc[sec_pos, col]
                         )
             else:
@@ -176,10 +187,14 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                     ).dropna().unique().min()  # include the one at end_time
                 except ValueError:  # no valid values
                     final_df.loc[:, col] = float('nan')
+            final_df_ini += 1
+            final_df_inis.append(final_df_ini)
 
         if step:  # assume step function
             # continue to append new columns until the end
-            for col, ini in zip(final_df.columns, ini_val_pos):
+            for col, ini, new_ini in zip(
+                    final_df.columns, ini_val_pos, final_df_inis
+                    ):
                 # if the whole column is nan value, skip the col
                 if all([
                         isinstance(ent, str) or isnan(ent)
@@ -189,7 +204,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                         ]):
                     continue # skip column
                 oldind = ini
-                newind = 1
+                newind = new_ini
                 oldlen = datadf.shape[0]
                 newlen = final_df.shape[0]
                 while newind < newlen:
@@ -215,8 +230,10 @@ def convert_df(datadfs: dict, start_time: datetime=None,
         else:  # run interpolation
             # continue to append new columns until the end
             newlen = final_df.shape[0]
-            for col, ini in zip(final_df.columns, ini_val_pos):
-                newind = 1
+            for col, ini, new_ini in zip(
+                    final_df.columns, ini_val_pos, final_df_inis
+                    ):
+                newind = new_ini
                 # to fit the initial value assumption
                 try:
                     while final_df.index[newind] < datadf.index[ini]:
@@ -377,15 +394,27 @@ if __name__ == '__main__':
     from pandas import read_csv, read_excel, Timestamp, ExcelFile
 
     # check for assuming nan values for data before the first valid value
-    # FILENAME = '../dat/time_of_change.csv'
-    # TEST_DFS = read_data(FILENAME, header=0)
-    # NEW_DFS = convert_df(
-        # TEST_DFS, datetime(2017, 1, 2, 0, 0), ini_val=1
-    # )
-    # import pdb; pdb.set_trace()
-    # assert isnan(
-        # NEW_DFS['time_of_change'].loc[datetime(2017, 1, 2, 9, 30), 'Item 1']
-    # )
+    FILENAME = '../dat/time_of_change.csv'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 6, 0), datetime(2017, 1, 3, 10, 0),
+        ini_val=3
+    )
+    assert isnan(
+        NEW_DFS['time_of_change'].loc[datetime(2017, 1, 3, 9, 50), 'Item 2']
+    )
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 3, 10, 0), 'Item 2'
+    ] == 1
+    assert isnan(
+        NEW_DFS['time_of_change'].loc[datetime(2017, 1, 1, 6, 30), 'Item 3']
+    )
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 1, 9, 40), 'Item 3'
+    ] == 1
+    assert isnan(
+        NEW_DFS['time_of_change'].loc[datetime(2017, 1, 1, 6, 30), 'Item 4']
+    )
 
     # test the interpolation abilities for the first value
     FILENAME = '../dat/missing_data_altered.xls'
