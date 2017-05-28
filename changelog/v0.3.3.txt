@@ -3,3 +3,4 @@ Change log from v0.3.2 to v0.3.3
 - Debug to filter data based on the given time span only and ignore the rest of the data in the dataframe
 - Debug to give correct beginning values when step function assumption and intermediate starting time is used
 - Debug for the computer generated ending time: the last index in the new dataframe should come after the last index of the original dataframe, and the second last index in the new dataframe should come before the last index of the original one
+- Add new feature to put blanks for data points that happen before the preprocessed data
