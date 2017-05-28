@@ -303,11 +303,14 @@ A user assumes the values of data in the output data file which the correspondin
 \begin{itemize}
 \item Use the minimum value in the trend
 \item Use the first value in the trend
+\item Use blanks
 \end{itemize}
 
 .
 For the first option "Use the minimum value in the trend", the data preprocessing helper finds the minimum values of the data in each column in the input data file, and assumes that all data occur before the input file time period are maintained at these minimum values.
-For the second option " Use the first value in the trend", the data preprocessing helper uses the first valid value in each column of the input file to predict the values of the data points earlier than the input file.
+For the second option "Use the first value in the trend", the data preprocessing helper uses the first valid value in each column of the input file to predict the values of the data points earlier than the input file.
+For the third option "Use blanks" which is also the default option, the data preprocessing helper assumes nothing for the data occur before that recorded in the file.
+It simply puts blanks in those cells.
 
 \section{Inquiries}
 
