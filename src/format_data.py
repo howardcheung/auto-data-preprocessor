@@ -111,16 +111,6 @@ def convert_df(datadfs: dict, start_time: datetime=None,
         sec_val_pos = []  # locations of the second good values
         final_df_inis = []  # location of initial value in new dataframe
         for col in final_df.columns:
-            # # if the whole column is nan, skip the loop immediately
-            # if all([
-                    # isinstance(ent, str) or isnan(ent)
-                    # for ent in datadf.loc[
-                        # start_time:end_time+timedelta(0, 0, 1), col
-                    # ]  # include the one at end_time
-                    # ]):
-                # final_df.loc[:, col] = float('nan')
-                # ini_val_pos.append(datadf.shape[0])
-                # continue  # next loop
             # find the appearance of the first value
             # initialize the position for data that contain no good values
             # should be the index right before the start time of the new
@@ -128,31 +118,54 @@ def convert_df(datadfs: dict, start_time: datetime=None,
             pos = datadf.index[-1]
             sec_pos = datadf.index[-1]
             num_gd_value = 0  # number of good values indexed
+            # find the good value appear after the required datadf first,
+            # then find the one appearing right before it
             for ind_oldind, oldind in enumerate(datadf.index[:-1]):
                 if not isinstance(datadf.loc[oldind, col], str) and \
                         not isnan(datadf.loc[oldind, col]) and \
-                        datadf.index[ind_oldind+1] > final_df.index[0] and \
-                        num_gd_value == 0:
-                    pos = oldind
-                    ini_val_pos.append(ind_oldind)
-                    num_gd_value = 1
-                elif not isinstance(datadf.loc[oldind, col], str) and \
-                        not isnan(datadf.loc[oldind, col]) and \
-                        num_gd_value == 1:
+                        datadf.index[ind_oldind+1] > final_df.index[0]:
                     sec_pos = oldind
                     sec_val_pos.append(ind_oldind)
-                    num_gd_value = 2
+                    num_gd_value = 1
                     break
+            # if you can't find the first valid point, the search for the first
+            # valid value ends
+            if num_gd_value == 1:
+                for ind_oldind, oldind in enumerate(reversed(
+                        datadf.index[:sec_val_pos[-1]]
+                        )):
+                    if not isinstance(datadf.loc[oldind, col], str) and \
+                            not isnan(datadf.loc[oldind, col]):
+                        pos = oldind
+                        ini_val_pos.append(sec_val_pos[-1]-1-ind_oldind)
+                        num_gd_value = 2
+                        break
+            # if you are able to find good values sandiwching the starting time
+            # of the new dataframe, shift the values
+            if num_gd_value == 1:
+                pos = sec_pos
+                ini_val_pos.append(sec_val_pos.pop())
+                sec_pos = datadf.index[-1]  # reset second position
+                for ind_oldind, oldind in enumerate(
+                        datadf.index[ini_val_pos[-1]+1:-1]
+                        ):
+                    if not isinstance(datadf.loc[oldind, col], str) and \
+                            not isnan(datadf.loc[oldind, col]):
+                        sec_pos = oldind
+                        sec_val_pos.append(ind_oldind+ini_val_pos[-1]+1)
+                        num_gd_value = 2
+                        break
             # fill in placeholders if not collected
             if num_gd_value == 0:
                 ini_val_pos.append(datadf.shape[0]-1)
-            if num_gd_value <= 1:
+                sec_val_pos.append(datadf.shape[0]-1)
+            if num_gd_value == 1:
                 sec_val_pos.append(datadf.shape[0]-1)
             # assign first value
             final_df_ini = 0
             # shift the final_df initial index if nan values are needed
             if ini_val == 3:
-                while final_df_ini < final_df.shape[0]-1 and \
+                while final_df_ini < final_df.shape[0]-2 and \
                         final_df.index[final_df_ini] < pos:
                     final_df.loc[final_df.index[final_df_ini], col] = \
                         float('nan')
@@ -192,8 +205,8 @@ def convert_df(datadfs: dict, start_time: datetime=None,
 
         if step:  # assume step function
             # continue to append new columns until the end
-            for col, ini, new_ini in zip(
-                    final_df.columns, ini_val_pos, final_df_inis
+            for col, ini, new_ini, sec_ini in zip(
+                    final_df.columns, ini_val_pos, final_df_inis, sec_val_pos
                     ):
                 # if the whole column is nan value, skip the col
                 if all([
@@ -207,6 +220,13 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                 newind = new_ini
                 oldlen = datadf.shape[0]
                 newlen = final_df.shape[0]
+                # ensure that the first index for datadf is earlier or 
+                # happen at the same time as that of final_df's first data
+                # while the second index for datadf must appear later than
+                # the first one
+                if final_df.index[newind] > datadf.index[oldind] and \
+                        final_df.index[newind] >= datadf.index[sec_ini]:
+                    oldind = sec_ini  # shift it
                 while newind < newlen:
                     if final_df.index[newind] < datadf.index[oldind]:
                         # use the previous value
@@ -397,6 +417,15 @@ if __name__ == '__main__':
     FILENAME = '../dat/time_of_change.csv'
     TEST_DFS = read_data(FILENAME, header=0)
     NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 9, 40), interval=300, ini_val=3
+    )
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 1, 9, 40), 'Item 3'
+    ] == 1
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 1, 9, 45), 'Item 3'
+    ] == 0
+    NEW_DFS = convert_df(
         TEST_DFS, datetime(2017, 1, 1, 6, 0), datetime(2017, 1, 3, 10, 0),
         ini_val=3
     )
@@ -405,7 +434,7 @@ if __name__ == '__main__':
     )
     assert NEW_DFS['time_of_change'].loc[
         datetime(2017, 1, 3, 10, 0), 'Item 2'
-    ] == 1
+    ] == 0
     assert isnan(
         NEW_DFS['time_of_change'].loc[datetime(2017, 1, 1, 6, 30), 'Item 3']
     )
@@ -425,6 +454,17 @@ if __name__ == '__main__':
     NEW_DF = NEW_DFS['Sheet1']
     assert isnan(NEW_DF.loc[datetime(2017, 1, 1, 11, 0), 'Pressure'])
     assert NEW_DF.loc[datetime(2017, 1, 1, 11, 30), 'Pressure'] == 4.5
+
+    # test for interpolation for data which first time value is invalid
+    # and is sandwiched between two different values
+    FILENAME = '../dat/missing_data_altered.xls'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 12, 0), datetime(2017, 1, 1, 22, 00),
+        ini_val=3, step=False
+    )
+    NEW_DF = NEW_DFS['Sheet1']
+    assert NEW_DF.loc[datetime(2017, 1, 1, 12, 0), 'Pressure'] == 9.5
 
     # test the interpolation abilities for the first value
     FILENAME = '../dat/missing_data_altered.xls'
