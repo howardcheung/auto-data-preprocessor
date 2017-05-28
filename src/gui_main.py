@@ -435,10 +435,11 @@ class MainGUI(wx.Frame):
             panel, value=u'Use the minimum value in the trend',
             choices=[
                 u'Use the minimum value in the trend',
-                u'Use the first value in the trend'
+                u'Use the first value in the trend',
+                u'Use blanks'
             ], pos=(sec_blk, layer_depth), size=(225, 20)
         )
-        self.early_pts.SetSelection(0)
+        self.early_pts.SetSelection(2)
         self.early_pts.SetEditable(False)
         layer_depth += layer_diff
 
