@@ -416,6 +416,16 @@ if __name__ == '__main__':
         NEW_DFS['time_of_change'].loc[datetime(2017, 1, 1, 6, 30), 'Item 4']
     )
 
+    FILENAME = '../dat/missing_data_altered.xls'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 11, 0), datetime(2017, 1, 1, 22, 00),
+        ini_val=3, step=False
+    )
+    NEW_DF = NEW_DFS['Sheet1']
+    assert isnan(NEW_DF.loc[datetime(2017, 1, 1, 11, 0), 'Pressure'])
+    assert NEW_DF.loc[datetime(2017, 1, 1, 11, 30), 'Pressure'] == 4.5
+
     # test the interpolation abilities for the first value
     FILENAME = '../dat/missing_data_altered.xls'
     TEST_DFS = read_data(FILENAME, header=0)
