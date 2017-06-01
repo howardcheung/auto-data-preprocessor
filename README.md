@@ -31,6 +31,10 @@ If you want, you can also assume the values to be interpolated values
 
 The executable (.exe) of the software is only provided for 64-bit Windows. You can download it at [https://github.com/howardcheung/data-preprocessing-helper/releases](https://github.com/howardcheung/data-preprocessing-helper/releases)
 
+# Feedback?
+
+Feel free to post an issue at [https://github.com/howardcheung/data-preprocessing-helper/issues](https://github.com/howardcheung/data-preprocessing-helper/issues) or send me an email at howard (at) gmail.com to let me know the issue!
+
 # Licenses
 
 ## License of this software
