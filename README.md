@@ -1,4 +1,3 @@
-# Data Preprocessing Helper
 This project aims at pre-processing times-series raw data to assist researchers/engineers/analysts to analyze their data using spreadsheet softwares by
 
 - re-organizing data with inconsistent time intervals to that with constant time intervals
@@ -29,6 +28,7 @@ If you want, you can also assume the values to be interpolated values
 ![](https://github.com/howardcheung/auto-data-preprocessor/raw/master/doc/interpolation.png "Interpolated data")
 
 # Download
+
 The executable (.exe) of the software is only provided for 64-bit Windows. You can download it at [https://github.com/howardcheung/data-preprocessing-helper/releases](https://github.com/howardcheung/data-preprocessing-helper/releases)
 
 # Licenses
