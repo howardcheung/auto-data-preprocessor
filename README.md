@@ -1,37 +1,35 @@
 # Data Preprocessing Helper
-This project wraps up the pre-processing routine in other projects to help others to preprocess the data without coding work
+This project aims at pre-processing times-series raw data to assist researchers/engineers/analysts to analyze their data using spreadsheet softwares by
+
+- re-organizing data with inconsistent time intervals to that with constant time intervals
+- filling in invalid values in data by interpolation
+- align data in multiple worksheets in a spreadsheet file with the same time span
+
+This software is useful to preprocess
+
+- building management system data (BMS) with on/off signals
+- environmental data with invalid data
+- economic or stock data with gaps in weekends and holidays, and you want space-fillers for them
+- etc.
 
 # Introduction
 
 This repository aims at making tools to facilitate data analysis. At the moment,
 it is able to turn data collected at time-of-change with invalid values
 
-![](https://github.com/howardcheung/auto-data-preprocessor/raw/Documentation/doc/time-of-change.png "Ugly time-of-change data")
+![](https://github.com/howardcheung/auto-data-preprocessor/raw/master/doc/time-of-change.png "Ugly time-of-change data")
 
 to a file which records data at fixed time interval assuming the data
 to be a step function
 
-![](https://github.com/howardcheung/auto-data-preprocessor/raw/Documentation/doc/step.png "Preprocessed data assuming step function relationship")
+![](https://github.com/howardcheung/auto-data-preprocessor/raw/master/doc/step.png "Preprocessed data assuming step function relationship")
 
 If you want, you can also assume the values to be interpolated values
 
-![](https://github.com/howardcheung/auto-data-preprocessor/raw/Documentation/doc/interpolation.png "Interpolated data")
+![](https://github.com/howardcheung/auto-data-preprocessor/raw/master/doc/interpolation.png "Interpolated data")
 
-
-# Work to be done:
-- add intermediate timestamp to the output dataframe
-- add tab to choose results depending on time range and weekday ranges
-- write the user manual
-
-# Diretories and files
-* `changelog`: directory that stores changelog of the software for different versions
-* `dat`: directory that stores testing data
-* `doc`: directory that stores the user manual
-* `exe`: directory that stores instructions on how to compile the binary
-* `licenses`: directory that contains licenses of the modules
-* `src`: directory that stores the source python script files
-* `LICENSE_BINARY`: license file for the software
-* `README.md`: file of Markdown script for this readme
+# Download
+The executable (.exe) of the software is only provided for 64-bit Windows. You can download it at [https://github.com/howardcheung/data-preprocessing-helper/releases](https://github.com/howardcheung/data-preprocessing-helper/releases)
 
 # Licenses
 
@@ -67,6 +65,20 @@ Please notice that the software is developed based on Python 3.5.1 and the binar
 | xlwt (1.2.0) | [Link](https://github.com/python-excel/xlwt/blob/917a8ad8db35d6e8abb306a2fda2ace648a6ab89/docs/licenses.rst) |
 
 The licenses of these modules are included in the directory LICENSE.
+
+# Work to be done:
+- add intermediate timestamp to the output dataframe
+- add tab to choose results depending on time range and weekday ranges
+
+# Diretories and files in the repository
+* `changelog`: directory that stores changelog of the software for different versions
+* `dat`: directory that stores testing data
+* `doc`: directory that stores the user manual
+* `exe`: directory that stores instructions on how to compile the binary
+* `licenses`: directory that contains licenses of the modules
+* `src`: directory that stores the source python script files
+* `LICENSE_BINARY`: license file for the software
+* `README.md`: file of Markdown script for this readme
 
 # Acknowlegement
 
