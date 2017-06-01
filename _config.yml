@@ -1,1 +1,3 @@
 theme: jekyll-theme-minimal
+title: Data Preprocessing Helper
+description: A project that helps you preprocess your time-series data for annoying gaps and inconsistent time intervals
