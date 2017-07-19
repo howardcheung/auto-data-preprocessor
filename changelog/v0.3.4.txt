@@ -1,0 +1,3 @@
+Change log from v0.3.2 to v0.3.4
+=======================================================
+- Debug for incorrect import of numeric data as string data, resulting in NaN values in multiple columns
