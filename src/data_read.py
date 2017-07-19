@@ -89,6 +89,9 @@ def read_data(filename: str, header: int=None,
             pass
         pddf.set_index('Time', inplace=True)
 
+        # force convert all values to float64
+        pddf = pddf.convert_objects(convert_numeric=True)
+
         return pddf
 
     # read the file. Read the file as two columns first to conduct
@@ -272,6 +275,18 @@ def interpolate_with_s(mid_date: datetime, a_date: datetime, b_date: datetime,
 if __name__ == '__main__':
 
     from os.path import basename
+
+    # check to ensure that no float numbers are converted to string
+    # accidentally
+    FILENAME = '../dat/complex.csv'
+    TEST_DFS = read_data(FILENAME, header=0, time_format='%m/%d/%Y %H:%M:%S')
+    for sheet_name in TEST_DFS:
+        datadf = TEST_DFS[sheet_name]
+        for col in datadf.columns:
+            assert not all([
+                isinstance(x, str) or isnan(x)
+                for x in datadf.loc[:, col]
+            ])
 
     # testing file reading with multiple worksheets
     FILENAME = '../dat/missing_data.xlsx'
