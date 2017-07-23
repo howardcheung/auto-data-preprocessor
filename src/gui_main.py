@@ -748,7 +748,7 @@ class MainGUI(wx.Frame):
                         if get_ext(self.dfpath.GetValue()) == 'csv'
                         else [self.sheetname.GetValue()]
                     )
-                )
+                ), dateautodetect=self.autotimeinputformat.GetValue()
             )
             # return error if load all sheet option is selected for csv file
             # output
