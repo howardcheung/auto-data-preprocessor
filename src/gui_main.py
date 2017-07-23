@@ -255,6 +255,13 @@ class MainGUI(wx.Frame):
             panel, value=u'%m/%d/%y %I:%M:%S %p CST',
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
+        # Computer to auto-detect the format instead
+        self.autotimeinputformat = wx.CheckBox(panel, pos=(sec_blk+70*4, layer_depth+2))
+        self.autotimeinputformat.SetValue(True)
+        wx.StaticText(
+            panel, label=u'Auto-detecting format\nof input time string',
+            pos=(sec_blk+70*4, layer_depth+20)
+        )
         # a button for instructions
         text = wx.StaticText(panel, label=u''.join([
             u'Same instructions as the format in output file'
