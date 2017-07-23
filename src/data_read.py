@@ -332,8 +332,10 @@ if __name__ == '__main__':
             '../dat/time_of_change-semicolon.csv',
             '../dat/time_of_change.csv'
         ]:
+            TIMEFORMAT='%m/%d/%y %I:%M:%S %p CST'
             if AUTODETECTTIME:
                 print('Auto-detecting structure of time format')
+                TIMEFORMAT=''
             print('Testing file import by using ', FILENAME)
             SHTNAME = split(FILENAME)[-1].split('.')[0]
             TEST_DF = read_data(
