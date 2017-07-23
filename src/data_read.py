@@ -12,6 +12,7 @@
 from datetime import datetime
 from math import isnan
 from ntpath import split
+from dateutil.parser import parse
 
 # import third party libraries
 # from numpy import where
@@ -25,7 +26,8 @@ from pandas.tslib import Timestamp
 def read_data(filename: str, header: int=None,
               time_format: str='%m/%d/%y %I:%M:%S %p CST',
               sheetnames: list=None,
-              interpolation: bool=False, duration: bool=False) -> dict:
+              interpolation: bool=False, duration: bool=False,
+              dateautodetect: bool=False) -> dict:
     """
         This function reads the data in filename that is in specified format
         and returns a pandas dataframe with time data as the index and
@@ -64,6 +66,10 @@ def read_data(filename: str, header: int=None,
             if the code should calculate the duration of each point in the
             time series and create a new column called 'Duration' in
             seconds. Default False
+
+        dateautodetect: bool
+            detect the format of the date time in the first column
+            automatically. Default False
     """
 
     # initialize the dataframe
@@ -81,10 +87,15 @@ def read_data(filename: str, header: int=None,
 
         # make time column as the index
         try:
-            pddf.loc[:, 'Time'] = [
-                datetime.strptime(timestr, time_format)
-                for timestr in pddf.loc[:, 'Time']
-            ]
+            if dateautodetect:
+                pddf.loc[:, 'Time'] = [
+                    parse(timestr) for timestr in pddf.loc[:, 'Time']
+                ]
+            else:
+                pddf.loc[:, 'Time'] = [
+                    datetime.strptime(timestr, time_format)
+                    for timestr in pddf.loc[:, 'Time']
+                ]
         except TypeError:  # the time string has been converted by pandas
             pass
         pddf.set_index('Time', inplace=True)
@@ -315,19 +326,25 @@ if __name__ == '__main__':
     # assert TEST_DF.loc[TEST_DF.index[2], 'Duration'] == 60*30
     # assert TEST_DF.loc[TEST_DF.index[-1], 'Duration'] == 60*30
 
-    for FILENAME in [
-        '../dat/time_of_change-semicolon.csv',
-        '../dat/time_of_change.csv'
-    ]:
-        print('Testing file import by using ', FILENAME)
-        SHTNAME = split(FILENAME)[-1].split('.')[0]
-        TEST_DF = read_data(FILENAME, header=0)[SHTNAME]
-        assert isinstance(TEST_DF.index[0], Timestamp)
-        assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
-        assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
-        assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
-        assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
-        assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
+    # test automatic time detector and ordinary time detector
+    for AUTODETECTTIME in [False, True]:
+        for FILENAME in [
+            '../dat/time_of_change-semicolon.csv',
+            '../dat/time_of_change.csv'
+        ]:
+            if AUTODETECTTIME:
+                print('Auto-detecting structure of time format')
+            print('Testing file import by using ', FILENAME)
+            SHTNAME = split(FILENAME)[-1].split('.')[0]
+            TEST_DF = read_data(
+                FILENAME, header=0, dateautodetect=AUTODETECTTIME
+            )[SHTNAME]
+            assert isinstance(TEST_DF.index[0], Timestamp)
+            assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 1'])
+            assert isnan(TEST_DF.loc[TEST_DF.index[1], 'Item 1'])
+            assert TEST_DF.loc[TEST_DF.index[1], 'Item 3'] == 1.0
+            assert isnan(TEST_DF.loc[TEST_DF.index[0], 'Item 3'])
+            assert TEST_DF.loc[TEST_DF.index[0], 'Item 4'] == 0.0
 
     # test for multi-header
     FILENAME = '../dat/time_of_change_multiheader.csv'
