@@ -1,0 +1,3 @@
+Change log from v0.3.4 to v0.3.5
+=======================================================
+- Add function to auto-detect the input time string. The user may not need to enter the input time string according to the instructions at the Python website.
