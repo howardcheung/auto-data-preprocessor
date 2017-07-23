@@ -256,12 +256,18 @@ class MainGUI(wx.Frame):
             pos=(sec_blk, layer_depth), size=(250, 20)
         )
         # Computer to auto-detect the format instead
-        self.autotimeinputformat = wx.CheckBox(panel, pos=(sec_blk+70*4, layer_depth+2))
+        self.autotimeinputformat = wx.CheckBox(
+            panel, pos=(sec_blk+70*4, layer_depth+2)
+        )
         self.autotimeinputformat.SetValue(True)
         wx.StaticText(
             panel, label=u'Auto-detecting format\nof input time string',
             pos=(sec_blk+70*4, layer_depth+20)
         )
+        self.autotimeinputformat.Bind(
+            wx.EVT_CHECKBOX, self.GreyOutInputTimeString
+        )
+        self.timestring.Enable(False)  # disable the option
         # a button for instructions
         text = wx.StaticText(panel, label=u''.join([
             u'Same instructions as the format in output file'
@@ -588,6 +594,16 @@ class MainGUI(wx.Frame):
             self.outputtimestring.Enable(False)
         else:
             self.ChangeForXlsFileOutput(evt)
+
+    def GreyOutInputTimeString(self, evt):
+        """
+            Grey out input time string when the auto-detection option is
+            selected
+        """
+        if self.autotimeinputformat.GetValue():
+            self.timestring.Enable(False)
+        else:
+            self.timestring.Enable(True)
 
     def TimeInstruct(self, evt):
         """
