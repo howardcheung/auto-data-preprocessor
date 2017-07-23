@@ -13,8 +13,11 @@ This software is useful to preprocess
 
 # Introduction
 
-This repository aims at making tools to facilitate data analysis. At the moment,
-it is able to turn data collected at time-of-change with invalid values
+This repository aims at making tools to facilitate data analysis. It provides a 1-page graphical user interface to preprocess BMS data and to facilitate analysis in spreadsheet format.
+
+![](https://github.com/howardcheung/data-preprocessing-helper/raw/master/doc/ui.png "Graphical User Interface")
+
+At the moment, it is able to turn data collected at time-of-change with invalid values
 
 ![](https://github.com/howardcheung/auto-data-preprocessor/raw/master/doc/time-of-change.png "Ugly time-of-change data")
 
