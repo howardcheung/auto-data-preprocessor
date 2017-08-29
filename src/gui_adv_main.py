@@ -64,17 +64,54 @@ class BasicTab(wx.Panel):
     """
         The first tab
     """
-    def __init__(self, parent):
+    def __init__(self, parent, frame):
         """
             This is the initilization function for the tab.
 
             Inputs:
             ==========
-            parent: wx.Frame
+            parent: wx.Notebook
                 parent object
+
+            frame: ex.Frame
+                the parent frame object
         """
         super(BasicTab, self).__init__(parent)
         t = wx.StaticText(self, -1, "This is a PageOne object", (20,20))
+        
+        # define layer size
+        begin_depth = 20
+        layer_diff = 40
+        first_blk = 20
+        sec_blk = 250
+        third_blk = 525
+
+        # title
+        # position: (from top to bottom, from left to right)
+        wx.StaticText(self, label=u''.join([
+            u'Basic setting for beginners'
+        ]), pos=(first_blk, begin_depth))
+
+        # Inputs to the data file path
+        layer_depth = begin_depth+layer_diff
+        text = wx.StaticText(
+            self, label=u'Data file path:',
+            pos=(first_blk, layer_depth+2)
+        )
+        # require additional object for textbox
+        # with default path
+        frame.dfpath = wx.TextCtrl(
+            self, value=u'../dat/time_of_change.csv',
+            pos=(sec_blk, layer_depth), size=(250, 20)
+        )
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        frame.dfpath.Bind(wx.EVT_TEXT, frame.ChangeForXlsFile)
+        button = wx.Button(
+            self, label=u'Browse...', pos=(third_blk, layer_depth)
+        )
+        button.Bind(wx.EVT_BUTTON, frame.OnOpen)
+        layer_depth += layer_diff
 
 
 class AdvancedTab(wx.Panel):
@@ -128,10 +165,10 @@ class MainFrame(wx.Frame):
         menubar.Append(helpm, '&Help')
         self.SetMenuBar(menubar)
 
-        nb = wx.Notebook(p)
+        nb = wx.Notebook(parent=p)
 
         # create the page windows as children of the notebook
-        page1 = BasicTab(nb)
+        page1 = BasicTab(nb, frame=self)
         page2 = AdvancedTab(nb)
 
         # add the pages to the notebook with the label to show on the tab
@@ -144,7 +181,7 @@ class MainFrame(wx.Frame):
         sizer.Add(nb, 1, wx.EXPAND)
         self.SetSizer(sizer)  # add the notebook to the frame directly
 
-
+    # define all event functions here
     def AboutDialog(self, evt):
         """
             Function to show the dialog box for About Information
@@ -162,6 +199,70 @@ class MainFrame(wx.Frame):
         info.AddDeveloper('Howard Cheung [howard.at (at) gmail.com]')
         adv.AboutBox(info)
 
+    def OnClose(self, evt):
+        """
+            Function to close the main window
+        """
+        self.Close(True)
+        evt.Skip()
+
+    def OnOpen(self, evt):
+        """
+            Function to open a file
+            Reference:
+            https://wxpython.org/Phoenix/docs/html/wx.FileDialog.html
+        """
+        # proceed asking to the user the new directory to open
+        openFileDialog = wx.FileDialog(
+            self, 'Open file', '', '',
+            ''.join([
+                'csv files (*.csv)|*.csv;|',
+                'xls files (*.xls)|*.xls;|',
+                'xlsx files (*.xlsx)|*.xlsx'
+            ]), wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+        )
+
+        if openFileDialog.ShowModal() == wx.ID_CANCEL:
+            return False  # the user changed idea...
+
+        # proceed loading the file chosen by the user
+        # this can be done with e.g. wxPython input streams:
+        filepath = openFileDialog.GetPath()
+        self.dfpath.SetValue(filepath)
+
+        # check if file exists
+        if not isfile(filepath):
+            wx.LogError('Cannot open file "%s".' % openFileDialog.GetPath())
+            return False
+
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        self.ChangeForXlsFile(evt)
+
+    def ChangeForXlsFile(self, evt):
+        """
+            Change options if the input file is an excel file
+        """
+        # load worksheet name choices for files with xls/ xlsx extension
+        # for self.sheetname ComboBox
+        filepath = self.dfpath.GetValue()
+        ext = get_ext(filepath)
+        if ext == 'xls' or ext == 'xlsx':
+            self.loadallsheets.Enable(True)
+            if not self.loadallsheets.GetValue():
+                self.sheetname.Enable(True)
+            try:  # the file may not exist
+                with ExcelFile(filepath) as xlsx:
+                    sheetnames = xlsx.sheet_names
+                    self.sheetname.SetItems(sheetnames)
+                    self.sheetname.SetValue(sheetnames[0])
+            except FileNotFoundError:
+                pass
+        else:
+            self.loadallsheets.Enable(False)
+            self.loadallsheets.SetValue(False)  # reset loading all worksheets
+            self.sheetname.Enable(False)
+
 
 # define functions
 def gui_main():
@@ -171,6 +272,19 @@ def gui_main():
     app = wx.App()
     MainFrame(None, title=u'Data Preprocessing Helper').Show()
     app.MainLoop()
+
+
+def get_ext(filepath: str) -> str:
+    """
+        Return the extension of a file given a file path
+
+        Inputs:
+        ==========
+        filepath: str
+            string character for a filepath
+    """
+
+    return split(filepath)[1].split('.')[-1]
 
 
 if __name__ == "__main__":
