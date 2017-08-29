@@ -536,8 +536,17 @@ class MainFrame(wx.Frame):
 
         # finally, put the notebook in a sizer for the panel to manage
         # the layout
-        sizer = wx.BoxSizer()
-        sizer.Add(nb, 1, wx.EXPAND)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(nb, 15, wx.EXPAND, 0)
+        # sizer.SetSizeHints(self)
+        self.SetSizer(sizer)
+
+        # buttons at the bottom
+        button_ok = wx.Button(self, label=u'Preprocess')
+        # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
+        # sizer.Add(button_ok, 1, wx.EXPAND | wx.ALL, 20)
+
+        sizer.SetSizeHints(self)
         self.SetSizer(sizer)  # add the notebook to the frame directly
 
     # define all event functions here
