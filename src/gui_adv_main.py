@@ -77,7 +77,6 @@ class BasicTab(wx.Panel):
                 the parent frame object
         """
         super(BasicTab, self).__init__(parent)
-        t = wx.StaticText(self, -1, "This is a PageOne object", (20,20))
         
         # define layer size
         begin_depth = 20
@@ -113,12 +112,34 @@ class BasicTab(wx.Panel):
         button.Bind(wx.EVT_BUTTON, frame.OnOpen)
         layer_depth += layer_diff
 
+        # ask for existence of header as a checkbox
+        text = wx.StaticText(
+            self, label=u'Existence of a header row:',
+            pos=(first_blk, layer_depth+2)
+        )
+        frame.header = wx.CheckBox(self, pos=(sec_blk, layer_depth))
+        frame.header.SetValue(True)
+        # for the positioning of the header numeric function
+        wx.StaticText(
+            self, label=u''.join([
+                'Number of rows to be skipped\nabove the header row:'
+            ]), pos=(third_blk-150, layer_depth), size=(150, 30)
+        )
+        frame.header_no = wx.SpinCtrl(
+            self, value='0', min=0, max=100000,  # max: approx. 1 month
+            pos=(third_blk+20, layer_depth),
+            size=(50, 20)
+        )
+        # add the dynamic information of the checkbox
+        frame.header.Bind(wx.EVT_CHECKBOX, frame.HeaderInput)
+        layer_depth += layer_diff
+
 
 class AdvancedTab(wx.Panel):
     """
         The second tab
     """
-    def __init__(self, parent):
+    def __init__(self, parent, frame):
         """
             This is the initilization function for the tab.
 
@@ -126,9 +147,54 @@ class AdvancedTab(wx.Panel):
             ==========
             parent: wx.Frame
                 parent object
+
+            frame: ex.Frame
+                the parent frame object
         """
         super(AdvancedTab, self).__init__(parent)
-        t = wx.StaticText(self, -1, "This is a PageTwo object", (40,40))
+        
+        # define layer size
+        begin_depth = 20
+        layer_diff = 40
+        first_blk = 20
+        sec_blk = 250
+        third_blk = 525
+
+        # title
+        # position: (from top to bottom, from left to right)
+        wx.StaticText(self, label=u''.join([
+            u'Advanced setting for more flexible but complex settings'
+        ]), pos=(first_blk, begin_depth))
+
+        # option to select sheet, if any, and choose if all sheets
+        # should be loaded
+        layer_depth = begin_depth+layer_diff
+        wx.StaticText(self, label=u''.join([
+            u'For xls/xlsx files only:'
+        ]), pos=(first_blk, layer_depth))
+        layer_depth = layer_depth+layer_diff
+        wx.StaticText(self, label=u''.join([
+            u'Choose a worksheet to load\n',
+            u'for xls/xlsx input file:'
+        ]), pos=(first_blk, layer_depth-5))
+        frame.sheetname = wx.ComboBox(
+            self, pos=(sec_blk, layer_depth), size=(100, 30)
+        )
+        frame.sheetname.Enable(False)
+        wx.StaticText(self, label=u''.join([
+            u'Load all worksheets with the\n',
+            u'same config for xls/xlsx input file:'
+        ]), pos=(third_blk-150, layer_depth-5))
+        frame.loadallsheets = wx.CheckBox(
+            self, pos=(third_blk+55, layer_depth)
+        )
+        frame.loadallsheets.SetValue(False)
+        if 'xls' not in get_ext(frame.dfpath.GetValue()):
+            frame.loadallsheets.Enable(False)
+        # check if anything needs to be changed after
+        # checking/unchecking the box
+        frame.loadallsheets.Bind(wx.EVT_CHECKBOX, frame.LoadAllSheets)
+        layer_depth += layer_diff
 
 
 class MainFrame(wx.Frame):
@@ -169,7 +235,7 @@ class MainFrame(wx.Frame):
 
         # create the page windows as children of the notebook
         page1 = BasicTab(nb, frame=self)
-        page2 = AdvancedTab(nb)
+        page2 = AdvancedTab(nb, frame=self)
 
         # add the pages to the notebook with the label to show on the tab
         nb.AddPage(page1, "Basic")
@@ -262,6 +328,26 @@ class MainFrame(wx.Frame):
             self.loadallsheets.Enable(False)
             self.loadallsheets.SetValue(False)  # reset loading all worksheets
             self.sheetname.Enable(False)
+
+    def HeaderInput(self, evt):
+        """
+            Function to allow input of file header informaiton if the
+            existence of a header is confirmed
+        """
+        if evt.IsChecked():
+            self.header_no.Enable(True)
+        else:
+            self.header_no.Enable(False)
+
+    def LoadAllSheets(self, evt):
+        """
+            To disable the selection of the sheets based on the selection
+            of the option of loadallsheet
+        """
+        if self.loadallsheets.GetValue():
+            self.sheetname.Enable(False)
+        else:
+            self.sheetname.Enable(True)
 
 
 # define functions
