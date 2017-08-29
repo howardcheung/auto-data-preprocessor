@@ -65,15 +65,32 @@ class BasicTab(wx.Panel):
         The first tab
     """
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+        """
+            This is the initilization function for the tab.
+
+            Inputs:
+            ==========
+            parent: wx.Frame
+                parent object
+        """
+        super(BasicTab, self).__init__(parent)
         t = wx.StaticText(self, -1, "This is a PageOne object", (20,20))
+
 
 class AdvancedTab(wx.Panel):
     """
         The second tab
     """
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
+        """
+            This is the initilization function for the tab.
+
+            Inputs:
+            ==========
+            parent: wx.Frame
+                parent object
+        """
+        super(AdvancedTab, self).__init__(parent)
         t = wx.StaticText(self, -1, "This is a PageTwo object", (40,40))
 
 
@@ -81,8 +98,23 @@ class MainFrame(wx.Frame):
     """
         Frame holding the tabs
     """
-    def __init__(self, title):
-        wx.Frame.__init__(self, None, title=title)
+    def __init__(self, parent, title):
+        """
+            This is the initilization function for the GUI.
+
+            Inputs:
+            ==========
+            parent: wx.Frame
+                parent object
+
+            title: str
+                title of the window
+        """
+        super(MainFrame, self).__init__(
+            parent, title=title, size=(720, 770)
+        )  # size of the application window
+
+        self.Centre()
 
         # Here we create a panel and a notebook on the panel
         p = wx.Panel(self)
@@ -109,7 +141,7 @@ def gui_main():
         Main function to intiate the GUI
     """
     app = wx.App()
-    MainFrame(title=u'Data Preprocessing Helper').Show()
+    MainFrame(None, title=u'Data Preprocessing Helper').Show()
     app.MainLoop()
 
 
