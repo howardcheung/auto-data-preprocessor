@@ -58,36 +58,43 @@ For licenses of modules involved in the development of the software,
 please visit <https://github.com/howardcheung/data-preprocessing-helper/>
 """
 
-# Some classes to use for the notebook pages.  Obviously you would
-# want to use something more meaningful for your application, these
-# are just for illustration.
-
-class PageOne(wx.Panel):
+# classes for tabs
+# Template from https://wiki.wxpython.org/Simple%20wx.Notebook%20Example
+class BasicTab(wx.Panel):
+    """
+        The first tab
+    """
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         t = wx.StaticText(self, -1, "This is a PageOne object", (20,20))
 
-class PageTwo(wx.Panel):
+class AdvancedTab(wx.Panel):
+    """
+        The second tab
+    """
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         t = wx.StaticText(self, -1, "This is a PageTwo object", (40,40))
 
 
 class MainFrame(wx.Frame):
-    def __init__(self):
-        wx.Frame.__init__(self, None, title="Simple Notebook Example")
+    """
+        Frame holding the tabs
+    """
+    def __init__(self, title):
+        wx.Frame.__init__(self, None, title=title)
 
         # Here we create a panel and a notebook on the panel
         p = wx.Panel(self)
         nb = wx.Notebook(p)
 
         # create the page windows as children of the notebook
-        page1 = PageOne(nb)
-        page2 = PageTwo(nb)
+        page1 = BasicTab(nb)
+        page2 = AdvancedTab(nb)
 
         # add the pages to the notebook with the label to show on the tab
-        nb.AddPage(page1, "Page 1")
-        nb.AddPage(page2, "Page 2")
+        nb.AddPage(page1, "Basic")
+        nb.AddPage(page2, "Advanced")
 
         # finally, put the notebook in a sizer for the panel to manage
         # the layout
@@ -102,7 +109,7 @@ def gui_main():
         Main function to intiate the GUI
     """
     app = wx.App()
-    MainFrame().Show()
+    MainFrame(title=u'Data Preprocessing Helper').Show()
     app.MainLoop()
 
 
