@@ -118,6 +118,16 @@ class MainFrame(wx.Frame):
 
         # Here we create a panel and a notebook on the panel
         p = wx.Panel(self)
+
+        # create menubar for About information
+        menubar = wx.MenuBar()
+        helpm = wx.Menu()
+        abti = wx.MenuItem(helpm, wx.ID_ABOUT, '&About', 'Program Information')
+        self.Bind(wx.EVT_MENU, self.AboutDialog, abti)
+        helpm.Append(abti)
+        menubar.Append(helpm, '&Help')
+        self.SetMenuBar(menubar)
+
         nb = wx.Notebook(p)
 
         # create the page windows as children of the notebook
@@ -132,7 +142,25 @@ class MainFrame(wx.Frame):
         # the layout
         sizer = wx.BoxSizer()
         sizer.Add(nb, 1, wx.EXPAND)
-        p.SetSizer(sizer)
+        self.SetSizer(sizer)  # add the notebook to the frame directly
+
+
+    def AboutDialog(self, evt):
+        """
+            Function to show the dialog box for About Information
+        """
+
+        info = adv.AboutDialogInfo()
+        info.SetName('Data Preprocessing Helper')
+        info.SetVersion('0.3.5')
+        info.SetDescription(DESCRIPTION)
+        info.SetCopyright('(C) Copyright 2017 Howard Cheung')
+        info.SetWebSite(
+            'https://github.com/howardcheung/data-preprocessing-helper/'
+        )
+        info.SetLicence(LICENSE)
+        info.AddDeveloper('Howard Cheung [howard.at (at) gmail.com]')
+        adv.AboutBox(info)
 
 
 # define functions
