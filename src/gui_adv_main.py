@@ -523,7 +523,7 @@ class MainFrame(wx.Frame):
         menubar.Append(helpm, '&Help')
         self.SetMenuBar(menubar)
 
-        nb = wx.Notebook(parent=p)
+        nb = wx.Notebook(p)
 
         # create the page windows as children of the notebook
         # pass the frame into it to make the frame event functions available
@@ -534,20 +534,25 @@ class MainFrame(wx.Frame):
         nb.AddPage(page1, "Basic")
         nb.AddPage(page2, "Advanced")
 
+        # create button
+        button_ok = wx.Button(p, label=u'Preprocess')
+
         # finally, put the notebook in a sizer for the panel to manage
         # the layout
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(nb, 20, wx.EXPAND, 0)
+        # sizer.Add(nb, 20, wx.EXPAND, 0)
+        sizer.Add(nb, 25, 0, border=10)
+        sizer.Add(button_ok, 1, wx.ALIGN_RIGHT, border=10)
         sizer.SetSizeHints(self)
         self.SetSizer(sizer)
 
         # buttons at the bottom
-        button_ok = wx.Button(self, label=u'Preprocess')
+        # button_ok = wx.Button(p, label=u'Preprocess', pos=(600, 600))
         # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
-        sizer.Add(button_ok, 1, wx.ALIGN_RIGHT, 20)
+        # sizer.Add(button_ok, 0, wx.ALIGN_RIGHT, 10)
 
-        sizer.SetSizeHints(self)
-        self.SetSizer(sizer)  # add the notebook to the frame directly
+        # sizer.SetSizeHints(self)
+        # self.SetSizer(sizer)  # add the notebook to the frame directly
 
     # define all event functions here
     def AboutDialog(self, evt):
