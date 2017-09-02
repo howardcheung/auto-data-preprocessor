@@ -506,7 +506,8 @@ class MainFrame(wx.Frame):
                 title of the window
         """
         super(MainFrame, self).__init__(
-            parent, title=title, size=(720, 770)
+            parent, title=title, size=(720, 770),
+            style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER
         )  # size of the application window
 
         self.Centre()
@@ -545,7 +546,8 @@ class MainFrame(wx.Frame):
         sizer.Add(nb, 15, 0, border=10)  # 25 for space under the advanced tab
         sizer.Add(button_ok, 1, wx.ALIGN_RIGHT | wx.RIGHT | wx.TOP | wx.BOTTOM, border=5)
         sizer.SetSizeHints(self)
-        self.SetSizer(sizer)
+        # self.SetSizer(sizer)
+        self.SetSizerAndFit(sizer)
 
     # define all event functions here
     def AboutDialog(self, evt):
