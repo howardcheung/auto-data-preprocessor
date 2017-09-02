@@ -80,7 +80,7 @@ class BasicTab(wx.Panel):
         
         # define layer size
         begin_depth = 20
-        layer_diff = 40
+        layer_diff = 60  # fewer settings and hence more space
         first_blk = 20
         sec_blk = 250
         third_blk = 525
