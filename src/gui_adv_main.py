@@ -208,12 +208,15 @@ class BasicTab(wx.Panel):
         text = wx.StaticText(self, label=u''.join([
             u'Minutes'
         ]), pos=(sec_blk+70*4, layer_depth+20))
-        frame.use_starttime = wx.CheckBox(self, pos=(sec_blk+70*5, layer_depth+2))
+        frame.use_starttime = wx.CheckBox(
+            self, pos=(sec_blk+70*5, layer_depth+2)
+        )
         frame.use_starttime.SetValue(True)
         wx.StaticText(
             self, label=u'Use file\nstarting time',
-            pos=(sec_blk+70*5, layer_depth+20)
-        )
+            pos=(sec_blk+70*5, layer_depth+20),
+            size=(75, 30)
+        )  # set size to (75,30) to push the right border for space in panel
         layer_depth += (layer_diff+20)
 
         # add ending time input
