@@ -1,0 +1,3 @@
+Change log from v0.3.5 to v0.3.6
+=======================================================
+- Separate settings to basic and advanced for gentler learning curve
