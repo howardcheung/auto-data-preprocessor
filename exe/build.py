@@ -16,7 +16,7 @@ from shutil import copyfile, rmtree
 import zipfile
 
 # define variables
-VERSION = '0.3.5'
+VERSION = '0.3.6'
 
 BITS = ['win32', 'amd64']
 for BIT in BITS:
@@ -28,7 +28,7 @@ for BIT in BITS:
         '-w',  # no console io
         '-y',  # overwrite existing files
         '--clean',  # clean to avoid corrupting the next build
-        '../src/gui_main.py'  # the GUI python file
+        '../src/gui_adv_main.py'  # the GUI python file
     ])
 
     # copy the created file to the releases directory
