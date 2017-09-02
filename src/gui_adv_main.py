@@ -87,12 +87,12 @@ class BasicTab(wx.Panel):
 
         # title
         # position: (from top to bottom, from left to right)
-        wx.StaticText(self, label=u''.join([
-            u'Basic settings for beginners'
-        ]), pos=(first_blk, begin_depth))
+        # wx.StaticText(self, label=u''.join([
+            # u'Basic settings'
+        # ]), pos=(first_blk, begin_depth))
 
         # Inputs to the data file path
-        layer_depth = begin_depth+layer_diff
+        layer_depth = begin_depth+layer_diff*0
         text = wx.StaticText(
             self, label=u'Data file path:',
             pos=(first_blk, layer_depth+2)
@@ -328,13 +328,13 @@ class AdvancedTab(wx.Panel):
 
         # title
         # position: (from top to bottom, from left to right)
-        wx.StaticText(self, label=u''.join([
-            u'Advanced settings for more flexible but complex settings'
-        ]), pos=(first_blk, begin_depth))
+        # wx.StaticText(self, label=u''.join([
+            # u'Advanced settings'
+        # ]), pos=(first_blk, begin_depth))
 
         # option to select sheet, if any, and choose if all sheets
         # should be loaded
-        layer_depth = begin_depth+layer_diff
+        layer_depth = begin_depth+layer_diff*0
         wx.StaticText(self, label=u''.join([
             u'For xls/xlsx input files only:'
         ]), pos=(first_blk, layer_depth))
@@ -533,8 +533,8 @@ class MainFrame(wx.Frame):
         page2 = AdvancedTab(nb, frame=self)
 
         # add the pages to the notebook with the label to show on the tab
-        nb.AddPage(page1, "Basic")
-        nb.AddPage(page2, "Advanced")
+        nb.AddPage(page1, "Basic settings")
+        nb.AddPage(page2, "Advanced settings")
 
         # create button
         button_ok = wx.Button(p, label=u'Preprocess', size=(100, 30))
@@ -869,6 +869,20 @@ class MainFrame(wx.Frame):
                output_timestring=self.outputtimestring.GetValue(),
                outputtimevalue=self.numtimeoutput.GetValue()
             )
+
+            # function to be called upon finishing processing
+            wx.CallLater(0, self.ShowMessage)
+            evt.Skip()
+
+        except PermissionError:  # file writing error
+            dlg = MessageDlg(''.join([
+                'Unable to write to the file "', self.newdfpath.GetValue(),
+                '"\n\n',
+                'Please close the file/ stop using the file and press '
+                'the Preprocess button again.\n\n'
+            ]), u'File writing error')
+            dlg.ShowModal()
+
         except BaseException:
             # box = wx.MessageDialog(
                 # self, format_exc(), u'Error', wx.OK | wx.ICON_INFORMATION
@@ -877,10 +891,6 @@ class MainFrame(wx.Frame):
             chgdep.ShowModal()
             chgdep.Destroy()
             return
-
-        # function to be called upon finishing processing
-        wx.CallLater(0, self.ShowMessage)
-        evt.Skip()
 
     def ShowMessage(self):
         """
