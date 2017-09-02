@@ -535,24 +535,17 @@ class MainFrame(wx.Frame):
         nb.AddPage(page2, "Advanced")
 
         # create button
-        button_ok = wx.Button(p, label=u'Preprocess')
+        button_ok = wx.Button(p, label=u'Preprocess', size=(100, 30))
+        # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
 
         # finally, put the notebook in a sizer for the panel to manage
         # the layout
         sizer = wx.BoxSizer(wx.VERTICAL)
         # sizer.Add(nb, 20, wx.EXPAND, 0)
-        sizer.Add(nb, 25, 0, border=10)
-        sizer.Add(button_ok, 1, wx.ALIGN_RIGHT, border=10)
+        sizer.Add(nb, 15, 0, border=10)  # 25 for space under the advanced tab
+        sizer.Add(button_ok, 1, wx.ALIGN_RIGHT | wx.RIGHT | wx.TOP | wx.BOTTOM, border=5)
         sizer.SetSizeHints(self)
         self.SetSizer(sizer)
-
-        # buttons at the bottom
-        # button_ok = wx.Button(p, label=u'Preprocess', pos=(600, 600))
-        # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
-        # sizer.Add(button_ok, 0, wx.ALIGN_RIGHT, 10)
-
-        # sizer.SetSizeHints(self)
-        # self.SetSizer(sizer)  # add the notebook to the frame directly
 
     # define all event functions here
     def AboutDialog(self, evt):
