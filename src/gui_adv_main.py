@@ -79,7 +79,7 @@ class BasicTab(wx.Panel):
         super(BasicTab, self).__init__(parent)
         
         # define layer size
-        begin_depth = 20
+        begin_depth = 40
         layer_diff = 60  # fewer settings and hence more space
         first_blk = 20
         sec_blk = 250
@@ -320,7 +320,7 @@ class AdvancedTab(wx.Panel):
         super(AdvancedTab, self).__init__(parent)
         
         # define layer size
-        begin_depth = 20
+        begin_depth = 40
         layer_diff = 40
         first_blk = 20
         sec_blk = 250
