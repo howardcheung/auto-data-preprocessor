@@ -6,8 +6,9 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
-\author{Howard Cheung \\ email: howard.at (at) gmail.com }
-\title{User manual for the Data Preprocessing Helper Version 0.3.5}
+\usepackage{cleveref}
+\author{Howard Cheung \\ email: howard.at (at) gmail.com or tungeast (at) protonmail.com}
+\title{User manual for the Data Preprocessing Helper Version 0.3.6}
 \begin{document}
 
 \maketitle
@@ -16,7 +17,7 @@
 
 \section{Introduction}
 
-This tool is made to assist data analysts who are unfamiliar with coding languages to preprocess their time-series data.
+This tool is made to assist data analysts who are unfamiliar with coding languages to preprocess their time-series data by filling the empty gaps reasonably and organizing them into data in constant time intervals.
 In a lot of engineering systems, data from different subsystems are obtained differently.
 While some of them are obtained at different fixed time intervals, some of them, such as on/off signals, are obtained at times when the signal changes.
 Some other data contain invalid or missing data points that results in invalid calculation.
@@ -44,7 +45,7 @@ csv files are files which data are stored with ',' or ';' as delimiters. For dat
 \item It can contain multiple rows above the data, but only the first row above the data will be considered as the header.
 \end{enumerate}
 
-An example of the data file is shown in Figure \ref{fig:csv_file}.
+An example of the data file is shown in \Cref{fig:csv_file}.
 
 \begin{figure}[H]
 \centering
@@ -86,7 +87,7 @@ First we start with a csv file with the structure in Figure \ref{fig:ugly_file}.
 \label{fig:ugly_file}
 \end{figure}
 
-As you can see, there are a lot of unavailable values in Figure \ref{fig:ugly_file}.
+There are a lot of unavailable values in Figure \ref{fig:ugly_file}.
 The timestamps on the left are also ugly because they are all acquired at different time intervals.
 It is very difficult to try comparing this set of data side-by-side with the other data set.
 
@@ -100,6 +101,11 @@ Its user interface is shown in Figure \ref{fig:ui}.
 \caption{Graphical user interface of the tool}
 \label{fig:ui}
 \end{figure}
+
+There are two types of settings: Basic settings and Advanced settings. Basic settings are the ones that you usually need to change to preprocess the data such as the location of the original data file and the location to output the preprocessed file.
+Advanced settings are ones that you will only change for special purposes, and their default settings should serve you well most of the time.
+
+To reformat the data in \
 
 To use the tool, use the first "Browse..." button on the right to choose the data file that you want to convert, and click the second "Browse..." button on the right to choose the directory where you want to save your file. Currently, it supports csv file (\href{https://en.wikipedia.org/wiki/Comma-separated_values}{Comma-separated Value File}), xls file (Microsoft Excel 1997-2003 File) and xlsx file (Microsoft Excel Open XML Format File). The locations of the two "Browse..." buttons are shown in Figure \ref{fig:ui_zoomed}.
 
