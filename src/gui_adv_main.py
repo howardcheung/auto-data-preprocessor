@@ -468,7 +468,7 @@ class AdvancedTab(wx.Panel):
                 u'Continuous variable (inter- and extrapolation)'
             ], pos=(sec_blk, layer_depth), size=(225, 20)
         )
-        frame.func_choice.SetSelection(1)
+        frame.func_choice.SetSelection(0)
         frame.func_choice.SetEditable(False)
         layer_depth += layer_diff
 
@@ -540,16 +540,14 @@ class MainFrame(wx.Frame):
 
         # create button
         button_ok = wx.Button(p, label=u'Preprocess', size=(100, 30))
-        # button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
+        button_ok.Bind(wx.EVT_BUTTON, self.Analyzer)
 
         # finally, put the notebook in a sizer for the panel to manage
         # the layout
         sizer = wx.BoxSizer(wx.VERTICAL)
-        # sizer.Add(nb, 20, wx.EXPAND, 0)
         sizer.Add(nb, 15, 0, border=10)  # 25 for space under the advanced tab
         sizer.Add(button_ok, 1, wx.ALIGN_RIGHT | wx.RIGHT | wx.TOP | wx.BOTTOM, border=5)
         sizer.SetSizeHints(self)
-        # self.SetSizer(sizer)
         self.SetSizerAndFit(sizer)
 
     # define all event functions here
@@ -766,6 +764,207 @@ class MainFrame(wx.Frame):
         while self.end_day.GetCount() > lastday:
             self.end_day.Delete(self.end_day.GetCount()-1)
         evt.Skip()
+
+    def Analyzer(self, evt):
+        """
+            Function to initiate the main analysis.
+        """
+        # check all required inputs
+        # check the existence of the folder
+        if not isfile(self.dfpath.GetValue()):
+            wx.MessageBox(
+                u'Cannot open the data file!', u'Error',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            return
+        # check the existence of the saving path
+        if not Path(dirname(self.newdfpath.GetValue())).exists():
+            box = wx.MessageDialog(
+                self, u'Saving directory does not exist!', u'Error',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            box.Fit()
+            box.ShowModal()
+            return
+        # check file type
+        ext = get_ext(self.newdfpath.GetValue())
+        if not (ext == 'csv' or ext == 'xls' or ext == 'xlsx'):
+            box = wx.MessageDialog(
+                self, u'Output file type not supported!', u'Error',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            box.Fit()
+            box.ShowModal()
+            return
+        # check the time
+        start_time = datetime(
+            int(self.start_yr.GetValue()), int(self.start_mon.GetValue()),
+            int(self.start_day.GetValue()), int(self.start_hr.GetValue()),
+            int(self.start_min.GetValue())
+        )
+        end_time = datetime(
+            int(self.end_yr.GetValue()), int(self.end_mon.GetValue()),
+            int(self.end_day.GetValue()), int(self.end_hr.GetValue()),
+            int(self.end_min.GetValue())
+        )
+        if not self.no_endtime.GetValue() and start_time > end_time:
+            wx.MessageBox(
+                u'Starting time later than ending time!', u'Error',
+                wx.OK | wx.ICON_INFORMATION
+            )
+            return
+
+        # Run the analyzer
+        # output any error to a message box if needed
+        try:
+            header_exist = self.header.GetValue()
+            datadfs = read_data(
+                self.dfpath.GetValue(),
+                header=(self.header_no.GetValue() if header_exist else None),
+                time_format=self.timestring.GetValue(),
+                sheetnames=(
+                    [] if self.loadallsheets.GetValue() else (
+                        None
+                        if get_ext(self.dfpath.GetValue()) == 'csv'
+                        else [self.sheetname.GetValue()]
+                    )
+                ), dateautodetect=self.autotimeinputformat.GetValue()
+            )
+            # return error if load all sheet option is selected for csv file
+            # output
+            if get_ext(self.newdfpath.GetValue()) == 'csv' and \
+                    self.loadallsheets.GetValue() and \
+                    len(datadfs) > 1:
+                wx.MessageBox(
+                    u'\n'.join([
+                        u'Cannot output multiple worksheets to a csv file!',
+                        u'Please output it as a xls or xlsx file!'
+                    ]), u'Error',
+                    wx.OK | wx.ICON_INFORMATION
+                )
+                return
+            # show warning for columns that contain no valid data
+            for sheet_name in datadfs:
+                datadf = datadfs[sheet_name]
+                for col in datadf.columns:
+                    if all([
+                        isinstance(x, str) or isnan(x)
+                        for x in datadf.loc[:, col]
+                    ]):
+                        dlg = MessageDlg(''.join([
+                                'Column ', col, ' in ', sheet_name, 
+                                ' does not contain any valid values.',
+                                ' Closing in 2s......'
+                            ]), u'Warning')        
+                        wx.CallLater(2000, dlg.Destroy)
+                        dlg.ShowModal()
+            convert_df(
+               datadfs, (None if self.use_starttime.GetValue() else start_time),
+               (None if self.no_endtime.GetValue() else end_time),
+               interval=int(self.time_int.GetValue())*60,
+               step=(True if self.func_choice.GetSelection() == 0 else False),
+               ini_val=self.early_pts.GetSelection()+1,
+               output_file=self.newdfpath.GetValue(),
+               sep=self.output_sep.GetValue(),
+               output_timestring=self.outputtimestring.GetValue(),
+               outputtimevalue=self.numtimeoutput.GetValue()
+            )
+        except BaseException:
+            # box = wx.MessageDialog(
+                # self, format_exc(), u'Error', wx.OK | wx.ICON_INFORMATION
+            # )
+            chgdep = ErrorReportingDialog(None)
+            chgdep.ShowModal()
+            chgdep.Destroy()
+            return
+
+        # function to be called upon finishing processing
+        wx.CallLater(0, self.ShowMessage)
+        evt.Skip()
+
+    def ShowMessage(self):
+        """
+            Function to show message about the completion of the analysis
+        """
+        wx.MessageBox(
+            u'Processing Completed', u'Status', wx.OK | wx.ICON_INFORMATION
+        )
+
+
+class MessageDlg(wx.Dialog):
+    """
+        Function for auto-closing message diaglog
+        from https://stackoverflow.com/questions/6012380/wxmessagebox-with-an-auto-close-timer-in-wxpython
+    """
+    def __init__(self, message, title):
+        """
+            Initailizing a new dialog box that can be closed automatically
+        """
+        wx.Dialog.__init__(self, None, -1, title, size=(400, 120))
+        self.CenterOnScreen(wx.BOTH)
+
+        ok = wx.Button(self, wx.ID_OK, "OK")
+        ok.SetDefault()
+        text = wx.StaticText(self, -1, message)
+
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        vbox.Add(text, 1, wx.ALIGN_CENTER | wx.TOP, 10)
+        vbox.Add(ok, 1, wx.ALIGN_CENTER | wx.BOTTOM, 10)
+        self.SetSizer(vbox)
+
+
+class ErrorReportingDialog(wx.Dialog):
+    """
+        Error Diaglog box
+        from http://zetcode.com/wxpython/dialogs/
+    """
+
+    def __init__(self, *args, **kw):
+        """
+            Initializing the dialog box
+        """
+        super(ErrorReportingDialog, self).__init__(*args, **kw)
+
+        self.InitUI()
+        self.SetSize((500, 400))
+        self.SetTitle(u'Error')
+
+    def InitUI(self):
+        """
+            Interface of the error dialog box
+        """
+
+        pnl = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+
+        sb = wx.StaticBox(pnl, label=u''.join([
+            u'Process failed. Please report your situation with the following error messages:'
+        ]))
+        sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)
+        sbs.Add(wx.TextCtrl(
+            pnl, value=format_exc(), size=(475, 400),
+            style=wx.TE_READONLY | wx.TE_MULTILINE
+        ))
+
+        pnl.SetSizer(sbs)
+
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        closeButton = wx.Button(self, label='Close')
+        hbox2.Add(closeButton, flag=wx.LEFT, border=5)
+
+        vbox.Add(pnl, proportion=1, flag=wx.ALL | wx.EXPAND, border=5)
+        vbox.Add(hbox2, flag=wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, border=10)
+
+        self.SetSizer(vbox)
+
+        closeButton.Bind(wx.EVT_BUTTON, self.OnClose)
+
+    def OnClose(self, e):
+        """
+            Close the error dialog box
+        """
+
+        self.Destroy()
 
 
 # define functions
