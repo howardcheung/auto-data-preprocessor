@@ -238,20 +238,20 @@ These rows will be ignored in the preprocessing.
 A user can specify the directory and the name of the file to be saved.
 They can either enter the path manually or use the "Browse" button to specify the location.
 
-\subsection{Start time in the new data file}
+\subsubsection{Start time in the new data file}
 A user can specify the start time in the new data file.
 If the start time is earlier than the earliest time specified in the data file, a user can choose the assumption to predict the values of the data points before the earliest time in the input data as described in Section \ref{subsec:early_dat}.
 Otherwise, the value at the start time will be calculated following the assumption of the relationship between data files as described in Section \ref{subsec:assume_bet_dat}.
 
-\subsection{Use file start time}
+\subsubsection{Use file start time}
 If this checkbox is checked, the data preprocessing helper will use the time on the first row of the data as the start time in the output file.
 The input in the input field "Start time in the new data file" will be ignored.
 
-\subsection{Ending time in the new data file}
+\subsubsection{Ending time in the new data file}
 A user can specify the ending time in the output data file.
 If the ending time is later than the last entry in the input data file, the assumption in Section \ref{subsec:assume_bet_dat} will be used to predict the values of the data at the end of the output file.
 
-\subsection{New time interval}
+\subsubsection{New time interval}
 A user can specify the time intervals between data points in the output file in minutes.
 Please note that the input must be an integer.
 

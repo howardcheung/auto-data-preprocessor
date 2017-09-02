@@ -44,7 +44,7 @@ for BIT in BITS:
             os.makedirs(REQ_DIR)
 
     # copy the files
-    copyfile('./dist/gui_main.exe', ''.join([
+    copyfile('./dist/gui_adv_main.exe', ''.join([
         '../releases/v', VERSION, '/DataPreprocessingHelper-v', VERSION,
         '-', BIT, '/DataPreprocessingHelper.exe'
     ]))
@@ -77,6 +77,6 @@ for BIT in BITS:
                 fopened.write(absname, arcname)
 
     # clean all created files in the current directory
-    os.remove('./gui_main.spec')
+    os.remove('./gui_adv_main.spec')
     rmtree('./build/')
     rmtree('./dist/')
