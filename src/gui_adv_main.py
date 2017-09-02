@@ -513,8 +513,6 @@ class MainFrame(wx.Frame):
             style=wx.DEFAULT_FRAME_STYLE ^ wx.RESIZE_BORDER
         )  # size of the application window
 
-        self.Centre()
-
         # Here we create a panel and a notebook on the panel
         p = wx.Panel(self)
 
@@ -550,6 +548,8 @@ class MainFrame(wx.Frame):
         sizer.SetSizeHints(self)
         self.SetSizerAndFit(sizer)
 
+        self.Centre()
+
     # define all event functions here
     def AboutDialog(self, evt):
         """
@@ -558,7 +558,7 @@ class MainFrame(wx.Frame):
 
         info = adv.AboutDialogInfo()
         info.SetName('Data Preprocessing Helper')
-        info.SetVersion('0.3.5')
+        info.SetVersion('0.3.6')
         info.SetDescription(DESCRIPTION)
         info.SetCopyright('(C) Copyright 2017 Howard Cheung')
         info.SetWebSite(
