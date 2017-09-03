@@ -1,6 +1,6 @@
 theme: jekyll-theme-minimal
 title: Data Preprocessing Helper
-description: A project that helps you preprocess your time-series data for annoying gaps and value-of-change format (data in different time intervals)
+description: A project that helps you preprocess your time-series data for annoying gaps and value-of-change format (data in different time intervals), originated from projects to process Building Management System (BMS) and Central Control and Monitoring System (CCMS) data.
 author: Howard Cheung
 plugins:
   - jekyll-seo-tag

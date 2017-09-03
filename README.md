@@ -6,7 +6,7 @@ This project aims at pre-processing times-series raw data to assist researchers/
 
 This software is useful to preprocess
 
-- building management system data (BMS) with value-of-change data
+- building management system (BMS) or Central Control and Monitoring System (CCMS) data with value-of-change data
 - environmental data with invalid data
 - economic or stock data with gaps in weekends and holidays, and you want space-fillers for them
 - etc.
