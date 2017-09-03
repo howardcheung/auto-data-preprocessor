@@ -1,12 +1,12 @@
 This project aims at pre-processing times-series raw data to assist researchers/engineers/analysts to analyze their data using spreadsheet softwares by
 
-- re-organizing data with inconsistent time intervals to that with constant time intervals
+- re-organizing value-of-change data with inconsistent time intervals to that with constant time intervals
 - filling in invalid values in data by interpolation
 - align data in multiple worksheets in a spreadsheet file with the same time span
 
 This software is useful to preprocess
 
-- building management system data (BMS) with on/off signals
+- building management system data (BMS) with value-of-change data
 - environmental data with invalid data
 - economic or stock data with gaps in weekends and holidays, and you want space-fillers for them
 - etc.
