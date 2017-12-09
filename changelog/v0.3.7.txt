@@ -1,0 +1,3 @@
+Change log from v0.3.6 to v0.3.7
+=======================================================
+- Fix a critical bug for the step function assumption when the time interval in the new file is larger than that of the original file
