@@ -16,14 +16,16 @@ from shutil import copyfile, rmtree
 import zipfile
 
 # define variables
-VERSION = '0.3.6'
+VERSION = '0.3.7'
 
 BITS = ['win32', 'amd64']
 for BIT in BITS:
     # create executables using embedded python
     print('Building the', BIT, 'application')
     subprocess.check_call([
-        ''.join(['../python-3.5.3-embed-', BIT, '/Scripts/pyinstaller']),
+        ''.join(['../python-3.5.3-embed-', BIT, '/python.exe']),
+        '-m',
+        'PyInstaller',  # calling the pyinstaller
         '--onefile',  # one file executable
         '-w',  # no console io
         '-y',  # overwrite existing files
