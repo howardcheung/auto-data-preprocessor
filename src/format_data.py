@@ -140,7 +140,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                         ini_val_pos.append(sec_val_pos[-1]-1-ind_oldind)
                         num_gd_value = 2
                         break
-            # if you are able to find good values sandiwching the starting time
+            # if you cannot find good values sandwiching the starting time
             # of the new dataframe, shift the values
             if num_gd_value == 1:
                 pos = sec_pos
@@ -184,6 +184,11 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                     # available value
                     final_df.loc[final_df.index[final_df_ini], col] = \
                         datadf.loc[pos, col]
+                    # use the second value instead if the sec_pos also appears
+                    # earlier than the first entry of the new data frame
+                    if step and sec_pos <= final_df.index[final_df_ini]:
+                        final_df.loc[final_df.index[final_df_ini], col] = \
+                            datadf.loc[sec_pos, col]
                 else:  # need interpolation
                     final_df.loc[final_df.index[final_df_ini], col] = \
                         interpolate_with_s(
@@ -220,7 +225,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                 newind = new_ini
                 oldlen = datadf.shape[0]
                 newlen = final_df.shape[0]
-                # ensure that the first index for datadf is earlier or 
+                # ensure that the first index for datadf is earlier or
                 # happen at the same time as that of final_df's first data
                 # while the second index for datadf must appear later than
                 # the first one
@@ -234,16 +239,62 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                             final_df.loc[final_df.index[newind-1], col]
                     else:
                         # find a new value
-                        if isinstance(
+                        # logic:
+                        # 1st: check if the value is valid, if not, keep
+                        # moving forward in the old series until a valid value
+                        # is found, it reaches to the end of the series,
+                        # or it becomes larger than the current value
+                        while oldind < oldlen-1 and (isinstance(
                                 datadf.loc[datadf.index[oldind], col], str
                                 ) or isnan(
                                     datadf.loc[datadf.index[oldind], col]
-                                ):
+                                )) and \
+                                datadf.index[oldind] <= final_df.index[newind]:
+                            oldind += 1
+                        # if the entry at oldind is still invalid, use
+                        # the previous value in the new entry
+                        if (isinstance(
+                                datadf.loc[datadf.index[oldind], col], str
+                                ) or isnan(
+                                    datadf.loc[datadf.index[oldind], col]
+                                )):
                             final_df.loc[final_df.index[newind], col] = \
                                 final_df.loc[final_df.index[newind-1], col]
-                        else:
+                        # after getting a valid value in the old series,
+                        # check if it is actually the very last entry
+                        # of the current entry of the new series. If so
+                        # assign it to the current entry of the news series.
+                        # If not, check the validity of all values between
+                        # it and the current entry of the new series. If none
+                        # of them is valid, also 
+                        elif oldind == oldlen-1 or (
+                                oldind < oldlen-1 and
+                                final_df.index[newind] < datadf.index[oldind+1]
+                                ):
                             final_df.loc[final_df.index[newind], col] = \
                                 datadf.loc[datadf.index[oldind], col]
+                        else:
+                            # assign the first valid value encountered between
+                            # the oldind and newind in the old series
+                            # if no assignment is done. All values in
+                            # between are invalid, set it to the oldind value
+                            final_df.loc[final_df.index[newind], col] = \
+                                datadf.loc[datadf.index[oldind], col]
+                            for sb_ts in reversed(datadf[
+                                datadf.index[oldind]:final_df.index[newind]
+                                ].index):
+                                if not (isinstance(
+                                    datadf.loc[sb_ts, col], str
+                                ) or isnan(
+                                    datadf.loc[sb_ts, col]
+                                )):
+                                    final_df.loc[
+                                        final_df.index[newind], col
+                                    ] = datadf.loc[sb_ts, col]
+                                    # set the oldind to the new position
+                                    while datadf.index[oldind] < sb_ts:
+                                        oldind += 1
+                                    break
                         if oldind < oldlen-1:
                             oldind += 1
                     newind += 1
@@ -413,6 +464,26 @@ if __name__ == '__main__':
 
     from pandas import read_csv, read_excel, Timestamp, ExcelFile
 
+    # check to estimate step function correctly when the required time
+    # interval is larger than the time interval between the data points
+    FILENAME = '../dat/time_of_change.csv'
+    TEST_DFS = read_data(FILENAME, header=0)
+    NEW_DFS = convert_df(
+        TEST_DFS, datetime(2017, 1, 1, 8, 0), interval=60*30, ini_val=3
+    )
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 1, 10, 0), 'Item 3'
+    ] == 0
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 1, 10, 30), 'Item 3'
+    ] == 0
+    assert NEW_DFS['time_of_change'].loc[
+        datetime(2017, 1, 1, 12, 30), 'Item 3'
+    ] == 1
+    assert NEW_DFS['time_of_change'].loc[
+        NEW_DFS['time_of_change'].index[-1], 'Item 3'
+    ] == 0
+
     # check for assuming nan values for data before the first valid value
     FILENAME = '../dat/time_of_change.csv'
     TEST_DFS = read_data(FILENAME, header=0)
@@ -529,7 +600,7 @@ if __name__ == '__main__':
         '../dat/time_of_change-long-name-file-0123456789001234567890.csv'
     TEST_DFS = read_data(FILENAME, header=0)
     NEW_DFS = convert_df(TEST_DFS, output_file='./testresult.xlsx')
-    remove('./testresult.xlsx')   
+    remove('./testresult.xlsx')
 
     # check time output
     # check function for computer-generated ending time
