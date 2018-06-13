@@ -3,6 +3,7 @@ This project aims at pre-processing times-series raw data to assist researchers/
 - re-organizing value-of-change data with inconsistent time intervals to that with constant time intervals
 - filling in invalid values in data by interpolation
 - align data in multiple worksheets in a spreadsheet file with the same time span
+- skip rows with duplicated entries of the same time instants to avoid potential error
 
 This software is useful to preprocess
 
