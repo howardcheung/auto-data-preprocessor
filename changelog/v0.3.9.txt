@@ -1,0 +1,4 @@
+Change log from v0.3.8 to v0.3.9
+=======================================================
+- Add test case for duplicated data points
+- Remove deprecated pandas code
