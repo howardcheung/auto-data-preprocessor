@@ -1,0 +1,3 @@
+Change log from v0.3.7 to v0.3.8
+=======================================================
+- Fix a critical bug by skipping rows with duplicated time entries
