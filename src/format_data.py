@@ -17,7 +17,7 @@ from os.path import dirname
 from pathlib import Path
 
 # import third party libraries
-from pandas import DataFrame, ExcelWriter, to_numeric
+from pandas import DataFrame, ExcelWriter, to_numeric, Series
 
 # import user-defined libraries
 
@@ -85,6 +85,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
     final_dfs = {}
     for sheet_name in datadfs:
         datadf = datadfs[sheet_name]
+        datadf.sort_index(inplace=True)  # sort the data
         if start_time is None:
             start_time = datadf.index[0]  # intialize it with the dataframe
 
@@ -119,9 +120,11 @@ def convert_df(datadfs: dict, start_time: datetime=None,
             sec_pos = datadf.index[-1]
             num_gd_value = 0  # number of good values indexed
             # find the good value appear after the required datadf first,
+            # good values include ones that are duplicated
             # then find the one appearing right before it
             for ind_oldind, oldind in enumerate(datadf.index[:-1]):
                 if not isinstance(datadf.loc[oldind, col], str) and \
+                        not isinstance(datadf.loc[oldind, col], Series) and \
                         not isnan(datadf.loc[oldind, col]) and \
                         datadf.index[ind_oldind+1] > final_df.index[0]:
                     sec_pos = oldind
@@ -135,6 +138,7 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                         datadf.index[:sec_val_pos[-1]]
                         )):
                     if not isinstance(datadf.loc[oldind, col], str) and \
+                            not isinstance(datadf.loc[oldind, col], Series) and \
                             not isnan(datadf.loc[oldind, col]):
                         pos = oldind
                         ini_val_pos.append(sec_val_pos[-1]-1-ind_oldind)
@@ -149,7 +153,8 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                 for ind_oldind, oldind in enumerate(
                         datadf.index[ini_val_pos[-1]+1:-1]
                         ):
-                    if not isinstance(datadf.loc[oldind, col], str) and \
+                    if not isinstance(datadf.loc[oldind, col], Series) and \
+                            not isinstance(datadf.loc[oldind, col], str) and \
                             not isnan(datadf.loc[oldind, col]):
                         sec_pos = oldind
                         sec_val_pos.append(ind_oldind+ini_val_pos[-1]+1)
@@ -215,7 +220,8 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                     ):
                 # if the whole column is nan value, skip the col
                 if all([
-                        isinstance(ent, str) or isnan(ent)
+                        isinstance(ent, str) or isinstance(ent, Series) or
+                        isnan(ent)
                         for ent in datadf.loc[
                             start_time:end_time+timedelta(0, 0, 1), col
                         ]  # include the one at end_time
@@ -244,8 +250,12 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                         # moving forward in the old series until a valid value
                         # is found, it reaches to the end of the series,
                         # or it becomes larger than the current value
+                        # ignore all duplicated values. They are probably all
+                        # wrong
                         while oldind < oldlen-1 and (isinstance(
                                 datadf.loc[datadf.index[oldind], col], str
+                                ) or isinstance(
+                                datadf.loc[datadf.index[oldind], col], Series
                                 ) or isnan(
                                     datadf.loc[datadf.index[oldind], col]
                                 )) and \
@@ -255,6 +265,8 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                         # the previous value in the new entry
                         if (isinstance(
                                 datadf.loc[datadf.index[oldind], col], str
+                                ) or isinstance(
+                                datadf.loc[datadf.index[oldind], col], Series
                                 ) or isnan(
                                     datadf.loc[datadf.index[oldind], col]
                                 )):
@@ -285,6 +297,8 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                                 ].index):
                                 if not (isinstance(
                                     datadf.loc[sb_ts, col], str
+                                ) or isinstance(
+                                    datadf.loc[sb_ts, col], Series
                                 ) or isnan(
                                     datadf.loc[sb_ts, col]
                                 )):
@@ -316,11 +330,14 @@ def convert_df(datadfs: dict, start_time: datetime=None,
                 oldind = ini
                 while newind < newlen:
                     # find the next available value in the old dataframe
+                    # good values include ones that are duplicated
                     oldoldind = oldind
                     oldind += 1
                     try:
                         while isinstance(
                                 datadf.loc[datadf.index[oldind], col], str
+                                ) or isinstance(
+                                datadf.loc[datadf.index[oldind], col], Series
                                 ) or isnan(
                                     datadf.loc[datadf.index[oldind], col]
                                 ):
