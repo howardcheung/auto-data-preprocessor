@@ -16,7 +16,7 @@ from dateutil.parser import parse
 
 # import third party libraries
 # from numpy import where
-from pandas import DataFrame, Series, ExcelFile, read_csv, read_excel
+from pandas import DataFrame, Series, ExcelFile, read_csv, read_excel, to_numeric
 from pandas.tslib import Timestamp
 
 # import user-defined libraries
@@ -101,7 +101,8 @@ def read_data(filename: str, header: int=None,
         pddf.set_index('Time', inplace=True)
 
         # force convert all values to float64
-        pddf = pddf.convert_objects(convert_numeric=True)
+        # pddf = pddf.convert_objects(convert_numeric=True)
+        pddf = pddf.apply(to_numeric, errors='coerce')
 
         return pddf
 
