@@ -16,7 +16,7 @@ from shutil import copyfile, rmtree
 import zipfile
 
 # define variables
-VERSION = '0.3.7'
+VERSION = '0.3.8'
 
 BITS = ['win32', 'amd64']
 for BIT in BITS:

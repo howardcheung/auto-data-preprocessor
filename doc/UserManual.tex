@@ -8,7 +8,7 @@
 \usepackage{amssymb}
 \usepackage{cleveref}
 \author{Howard Cheung \\ email: howard.at (at) gmail.com or tungeast (at) protonmail.com}
-\title{User manual for the Data Preprocessing Helper Version 0.3.7}
+\title{User manual for the Data Preprocessing Helper Version 0.3.8}
 \begin{document}
 
 \maketitle
@@ -20,7 +20,7 @@
 This tool is made to assist data analysts who are unfamiliar with coding languages to preprocess their time-series data by filling the empty gaps reasonably and organizing them into data in constant time intervals.
 In a lot of engineering systems, data from different subsystems are obtained differently.
 While some of them are obtained at different fixed time intervals, some of them, such as on/off signals, are obtained at times when the signal changes.
-Some other data contain invalid or missing data points that results in invalid calculation.
+Some other data contain invalid, missing or duplicated data points that results in invalid calculation.
 Some users may like numerical values over time string characters for their calculation.
 The resultant data are very difficult for laymen who only use spreadsheet software to analyze their data.
 This project aims at helping these analysts to preprocess their data by converting the time-of-value-change data to data collected at fixed time intervals.
