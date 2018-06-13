@@ -35,7 +35,7 @@ If you want, you can also assume the values to be interpolated values
 
 The executable (.exe) of the software is only provided for 32-bit and 64-bit Windows. You can download it at [https://github.com/howardcheung/data-preprocessing-helper/releases](https://github.com/howardcheung/data-preprocessing-helper/releases)
 
-For MacOS and Linux users, please try to use [Wine](https://www.winehq.org/). v0.3.7 has been tested with wine-2.0.3 stable in [Linux Mint](https://www.linuxmint.com/) 18.3 and works in it.
+For MacOS and Linux users, please try to use [Wine](https://www.winehq.org/). v0.3.8 has been tested with wine-3.0.1 stable in [Linux Mint](https://www.linuxmint.com/) 18.3 and works in it.
 
 # Feedback?
 
